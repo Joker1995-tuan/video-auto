@@ -103,10 +103,28 @@ return Number(num).toLocaleString("vi-VN")+"đ";
 // ================= VIDEO TAB =================
 
 function initApp(){
+  // ===== SWITCH TAB =====
+function switchTab(tab){
+
+let video = document.getElementById("videoTab");
+let salary = document.getElementById("salaryTab");
+
+if(tab==="video"){
+video.style.display="block";
+salary.style.display="none";
+}
+
+if(tab==="salary"){
+video.style.display="none";
+salary.style.display="block";
+}
+
+}
 renderVideoUI();
 renderSalaryUI();
 loadProducts();
 loadRevenue();
+switchTab("video");
 }
 
 // GIAO DIỆN VIDEO
@@ -364,3 +382,4 @@ fill:false
 </script>
 </body>
 </html>
+
