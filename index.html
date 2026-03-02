@@ -131,13 +131,15 @@ db.collection("products")
 .onSnapshot(snapshot=>{
 let html="";
 snapshot.forEach(doc=>{
-let d=doc.data();
-html+=`
-<div class="border p-4 rounded mb-2">
-<b>${d.name}</b><br>
-let price = isNaN(d.price) ? 0 : d.price;
-Giá: ${price.toLocaleString()}đ
-</div>`;
+  let d = doc.data();
+  let price = isNaN(d.price) ? 0 : d.price;
+
+  html += `
+  <div class="border p-4 rounded mb-2">
+    <b>${d.name}</b><br>
+    Giá: ${price.toLocaleString()}đ
+  </div>
+  `;
 });
 document.getElementById("productList").innerHTML=html;
 });
@@ -147,6 +149,7 @@ document.getElementById("productList").innerHTML=html;
 
 </body>
 </html>
+
 
 
 
