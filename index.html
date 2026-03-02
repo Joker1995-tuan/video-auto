@@ -3,137 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SUPER PRO 4.0</title>
+<title>SUPER PRO 5.0</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-100 p-6">
+<body class="bg-gray-100 p-8">
 
-<div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
+<div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-10">
 
-<h1 class="text-2xl font-bold mb-6">🔥 SUPER PRO 4.0</h1>
+<h1 class="text-3xl font-bold mb-8">
+🔥 SUPER PRO 5.0 <span class="text-gray-400 text-lg">Personal Control</span>
+</h1>
 
-<div class="flex gap-4 mb-6">
-<button onclick="showTab('video')" class="bg-black text-white px-4 py-2 rounded">🎬 Video & ROAS</button>
-<button onclick="showTab('salary')" class="bg-gray-800 text-white px-4 py-2 rounded">📊 Lương & Doanh Thu</button>
-</div>
-
-<!-- ================= VIDEO TOOL ================= -->
-<div id="videoTab">
-
-<div class="grid md:grid-cols-2 gap-4">
-<input id="name" placeholder="Tên sản phẩm" class="border p-3 rounded-lg">
-<input id="size" placeholder="Kích thước" class="border p-3 rounded-lg">
-<input id="price" placeholder="Giá bán" class="border p-3 rounded-lg">
-<input id="cost" placeholder="Giá xưởng" class="border p-3 rounded-lg">
-<input id="concept" placeholder="Concept" class="border p-3 rounded-lg">
-<input id="room" placeholder="Phòng sử dụng" class="border p-3 rounded-lg">
-<input id="target" placeholder="Tệp khách" class="border p-3 rounded-lg">
-<input id="ads" placeholder="Ngân sách ads" class="border p-3 rounded-lg">
-
-<select id="style" class="border p-3 rounded-lg col-span-2">
-<option value="luxury">Luxury</option>
-<option value="viral">Viral</option>
-<option value="emotional">Emotional</option>
-</select>
-</div>
-
-<button onclick="generateVideo()" class="mt-4 bg-black text-white px-6 py-3 rounded-xl">
-Tạo Nội Dung
+<div class="flex gap-4 mb-8">
+<button onclick="showTab('salary')" 
+class="px-6 py-3 rounded-full bg-black text-white font-semibold">
+📊 Lương & Doanh Thu
 </button>
+</div>
 
-<div class="mt-6 space-y-4">
-<textarea id="imagePrompt" class="w-full h-24 border p-3 rounded"></textarea>
-<textarea id="videoPrompt" class="w-full h-32 border p-3 rounded"></textarea>
-<textarea id="caption" class="w-full h-24 border p-3 rounded"></textarea>
-<div id="profitBox" class="bg-gray-100 p-4 rounded"></div>
+<!-- TARGET -->
+<div class="mb-6">
+<label class="text-sm text-gray-500">Mục tiêu doanh thu tháng</label>
+<input id="targetRevenue" type="number"
+class="w-full border rounded-xl p-3 mt-1"
+placeholder="Nhập mục tiêu (VD: 120000000)">
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+
+<div>
+<label class="text-sm text-gray-500">Ngày</label>
+<input type="date" id="date" class="w-full border rounded-xl p-3 mt-1">
+</div>
+
+<div>
+<label class="text-sm text-gray-500">Doanh thu hôm nay</label>
+<input type="number" id="revenue" class="w-full border rounded-xl p-3 mt-1">
+</div>
+
+<div>
+<label class="text-sm text-gray-500">Số đơn hôm nay</label>
+<input type="number" id="orders" class="w-full border rounded-xl p-3 mt-1">
 </div>
 
 </div>
 
-<!-- ================= SALARY DASHBOARD ================= -->
-<div id="salaryTab" style="display:none">
-
-<div class="grid md:grid-cols-3 gap-4">
-<input type="date" id="date">
-<input type="number" id="revenue" placeholder="Doanh thu hôm nay">
-<input type="number" id="orders" placeholder="Số đơn hôm nay">
-</div>
-
-<button onclick="saveDay()" class="mt-4 bg-black text-white px-6 py-3 rounded-xl">
+<button onclick="saveDay()" 
+class="mt-6 bg-black text-white px-8 py-3 rounded-xl font-semibold shadow-lg">
 Lưu Ngày
 </button>
 
-<hr class="my-6">
+<hr class="my-10">
 
-<div id="dashboard" class="bg-gray-100 p-4 rounded"></div>
+<div id="dashboard" class="grid md:grid-cols-3 gap-6"></div>
 
-<div class="w-full bg-gray-200 rounded-full h-6 mt-4">
-<div id="progressBar" class="bg-green-500 h-6 rounded-full text-center text-white text-sm"></div>
+<div class="mt-8">
+<div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+<div id="progressBar"
+class="bg-black h-6 text-white text-sm flex items-center justify-center">
+</div>
+</div>
 </div>
 
-<table class="w-full mt-6 border text-center">
-<thead class="bg-gray-200">
-<tr>
-<th class="p-2 border">Ngày</th>
-<th class="p-2 border">Doanh Thu</th>
-<th class="p-2 border">Đơn</th>
-<th class="p-2 border">Xóa</th>
-</tr>
-</thead>
-<tbody id="history"></tbody>
-</table>
+<hr class="my-10">
 
-</div>
+<h2 class="text-xl font-bold mb-4">📈 Biểu đồ doanh thu</h2>
+<canvas id="revenueChart"></canvas>
+
+<hr class="my-10">
+
+<div id="forecastBox" class="bg-gray-50 p-6 rounded-xl"></div>
 
 </div>
 
 <script>
 
-function showTab(tab){
-document.getElementById("videoTab").style.display = tab==="video" ? "block" : "none";
-document.getElementById("salaryTab").style.display = tab==="salary" ? "block" : "none";
-}
+let data = JSON.parse(localStorage.getItem("salesData")) || [];
+let chart;
 
 function formatMoney(num){
 return Number(num).toLocaleString("vi-VN")+"đ";
 }
-
-function generateVideo(){
-let name=document.getElementById("name").value;
-let size=document.getElementById("size").value;
-let price=parseFloat(document.getElementById("price").value||0);
-let cost=parseFloat(document.getElementById("cost").value||0);
-let ads=parseFloat(document.getElementById("ads").value||0);
-let concept=document.getElementById("concept").value;
-let room=document.getElementById("room").value;
-let target=document.getElementById("target").value;
-let style=document.getElementById("style").value;
-
-document.getElementById("imagePrompt").value=
-`Luxury ${room} interior, 5D painting "${name}", cinematic lighting, 4K`;
-
-document.getElementById("videoPrompt").value=
-`15s ${style} product video of "${name}" in ${room}, cinematic 4K`;
-
-document.getElementById("caption").value=
-`${name} - ${size}
-Phong cách ${concept}
-Giá ${formatMoney(price)}
-Phù hợp ${target}`;
-
-let fee=price*0.3;
-let profit=price-fee-cost-ads;
-let roas=ads>0?price/ads:0;
-
-document.getElementById("profitBox").innerHTML=
-`Phí 30%: ${formatMoney(fee)}<br>
-Lợi nhuận: <b>${formatMoney(profit)}</b><br>
-ROAS hòa vốn: ${roas.toFixed(2)}`;
-}
-
-/* ===== SALARY SYSTEM ===== */
-
-let data=JSON.parse(localStorage.getItem("salesData"))||[];
 
 function saveDay(){
 let date=document.getElementById("date").value;
@@ -145,15 +96,19 @@ localStorage.setItem("salesData",JSON.stringify(data));
 render();
 }
 
-function deleteDay(i){
-data.splice(i,1);
-localStorage.setItem("salesData",JSON.stringify(data));
-render();
-}
-
 function render(){
+
 let totalRevenue=0,totalOrders=0;
-data.forEach(d=>{totalRevenue+=d.revenue;totalOrders+=d.orders;});
+let highestRevenue=0,highestOrders=0;
+
+data.forEach(d=>{
+totalRevenue+=d.revenue;
+totalOrders+=d.orders;
+if(d.revenue>highestRevenue)highestRevenue=d.revenue;
+if(d.orders>highestOrders)highestOrders=d.orders;
+});
+
+let avgOrder = totalOrders>0 ? totalRevenue/totalOrders : 0;
 
 let base=6000000;
 let lunch=25_000*26;
@@ -161,32 +116,67 @@ let fuel=600000;
 let attendance=500000;
 let orderBonus=totalOrders*5000;
 let revenueBonus=totalRevenue>=100_000_000?totalRevenue*0.05:0;
-
 let totalIncome=base+lunch+fuel+attendance+orderBonus+revenueBonus;
 
-document.getElementById("dashboard").innerHTML=
-`Tổng doanh thu: <b>${formatMoney(totalRevenue)}</b><br>
-Tổng đơn: <b>${totalOrders}</b><br>
-5k/đơn: <b>${formatMoney(orderBonus)}</b><br>
-Thưởng 5%: <b>${formatMoney(revenueBonus)}</b><br>
-<hr>
-👉 Thu nhập tạm tính: <b class="text-green-600">${formatMoney(totalIncome)}</b>`;
+document.getElementById("dashboard").innerHTML=`
+<div class="bg-gray-50 p-6 rounded-xl">
+<div class="text-gray-400 text-sm">Doanh thu</div>
+<div class="text-xl font-bold">${formatMoney(totalRevenue)}</div>
+</div>
 
-let percent=(totalRevenue/100_000_000)*100;
+<div class="bg-gray-50 p-6 rounded-xl">
+<div class="text-gray-400 text-sm">Tổng đơn</div>
+<div class="text-xl font-bold">${totalOrders}</div>
+</div>
+
+<div class="bg-gray-50 p-6 rounded-xl">
+<div class="text-gray-400 text-sm">Thu nhập hiện tại</div>
+<div class="text-xl font-bold text-green-600">${formatMoney(totalIncome)}</div>
+</div>
+`;
+
+let target=parseFloat(document.getElementById("targetRevenue").value||100000000);
+let percent=(totalRevenue/target)*100;
 percent=percent>100?100:percent;
 document.getElementById("progressBar").style.width=percent+"%";
 document.getElementById("progressBar").innerText=percent.toFixed(1)+"%";
 
-let html="";
-data.forEach((d,i)=>{
-html+=`<tr>
-<td class="border p-2">${d.date}</td>
-<td class="border p-2">${formatMoney(d.revenue)}</td>
-<td class="border p-2">${d.orders}</td>
-<td class="border p-2"><button onclick="deleteDay(${i})" class="bg-red-500 text-white px-2 py-1 rounded">X</button></td>
-</tr>`;
+let days=data.length;
+let avgDailyRevenue=days>0?totalRevenue/days:0;
+let predictedRevenue=avgDailyRevenue*30;
+let predictedIncome=totalIncome+(predictedRevenue-totalRevenue)*0.05;
+
+document.getElementById("forecastBox").innerHTML=`
+<b>Ngày cao nhất:</b> ${formatMoney(highestRevenue)}<br>
+<b>Đơn cao nhất:</b> ${highestOrders}<br>
+<b>Giá trị TB/đơn:</b> ${formatMoney(avgOrder)}<br>
+<hr>
+<b>Dự báo doanh thu tháng:</b> ${formatMoney(predictedRevenue)}<br>
+<b>Dự báo thu nhập tháng:</b> ${formatMoney(predictedIncome)}
+`;
+
+drawChart();
+}
+
+function drawChart(){
+let ctx=document.getElementById("revenueChart").getContext("2d");
+let labels=data.map(d=>d.date);
+let revenues=data.map(d=>d.revenue);
+
+if(chart) chart.destroy();
+
+chart=new Chart(ctx,{
+type:"line",
+data:{
+labels:labels,
+datasets:[{
+label:"Doanh thu",
+data:revenues,
+borderColor:"black",
+fill:false
+}]
+}
 });
-document.getElementById("history").innerHTML=html;
 }
 
 render();
@@ -195,4 +185,3 @@ render();
 
 </body>
 </html>
-
