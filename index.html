@@ -128,7 +128,6 @@ loadProducts();
 function loadProducts(){
 db.collection("products")
 .where("uid","==",currentUser.uid)
-.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
 let html="";
 snapshot.forEach(doc=>{
@@ -147,3 +146,4 @@ document.getElementById("productList").innerHTML=html;
 
 </body>
 </html>
+
