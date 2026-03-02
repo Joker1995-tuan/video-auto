@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Generator - Tranh Decor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
+<h1 class="text-2xl font-bold mb-6">🎬 App Tạo Video Tranh Shopee</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+<input id="name" placeholder="Tên sản phẩm" class="border p-3 rounded-lg">
+<input id="size" placeholder="Kích thước (VD: 60x120)" class="border p-3 rounded-lg">
+<input id="price" placeholder="Giá bán (VD: 499000)" class="border p-3 rounded-lg">
+<input id="concept" placeholder="Concept (Luxury/Modern...)" class="border p-3 rounded-lg">
+<input id="room" placeholder="Phòng sử dụng" class="border p-3 rounded-lg">
+<input id="target" placeholder="Tệp khách hàng" class="border p-3 rounded-lg">
+
+</div>
+
+<button onclick="generate()" class="mt-6 bg-black text-white px-6 py-3 rounded-xl">
+Tạo Nội Dung
+</button>
+
+<div class="mt-8 space-y-6">
+
+<div>
+<h2 class="font-bold">🎨 Prompt Ảnh</h2>
+<textarea id="imagePrompt" class="w-full h-32 border p-3 rounded-lg"></textarea>
+</div>
+
+<div>
+<h2 class="font-bold">🎬 Prompt Video</h2>
+<textarea id="videoPrompt" class="w-full h-40 border p-3 rounded-lg"></textarea>
+</div>
+
+<div>
+<h2 class="font-bold">🛒 Caption Shopee</h2>
+<textarea id="caption" class="w-full h-32 border p-3 rounded-lg"></textarea>
+</div>
+
+<div>
+<h2 class="font-bold">✅ Checklist</h2>
+<div id="checklist" class="space-y-2"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+function generate() {
+let name = document.getElementById("name").value;
+let size = document.getElementById("size").value;
+let price = document.getElementById("price").value;
+let concept = document.getElementById("concept").value;
+let room = document.getElementById("room").value;
+let target = document.getElementById("target").value;
+
+document.getElementById("imagePrompt").value =
+`Create a ${concept} ${room} interior, warm cinematic lighting, modern furniture, large glossy 5D wall painting named "${name}" mounted on the wall, ultra realistic, high-end photography, 4K`;
+
+document.getElementById("videoPrompt").value =
+`Create a 15-second cinematic luxury product video.
+Scene 1: Fade in to a ${concept} ${room}.
+Scene 2: Slow dolly-in to the painting "${name}".
+Scene 3: Light reflection moving across glossy surface.
+Scene 4: Close-up texture detail.
+Warm golden lighting, 4K, 30fps.`;
+
+document.getElementById("caption").value =
+`🔥 ${name} - ${size}
+
+Phong cách ${concept} dành cho ${target}.
+Phù hợp treo ${room}.
+Chất liệu 5D bóng sang trọng.
+
+Giá chỉ ${price}đ
+Inbox ngay để được tư vấn!`;
+
+document.getElementById("checklist").innerHTML =
+`
+<label><input type="checkbox"> Tạo ảnh</label><br>
+<label><input type="checkbox"> Upscale ảnh</label><br>
+<label><input type="checkbox"> Tạo video</label><br>
+<label><input type="checkbox"> Add to Scene</label><br>
+<label><input type="checkbox"> Thêm nhạc</label><br>
+<label><input type="checkbox"> Chèn sub</label><br>
+<label><input type="checkbox"> Xuất file 1:1</label><br>
+<label><input type="checkbox"> Upload Shopee</label><br>
+<label><input type="checkbox"> Test quảng cáo</label>
+`;
+}
+</script>
+
+</body>
+</html>
