@@ -135,6 +135,7 @@ let d=doc.data();
 html+=`
 <div class="border p-4 rounded mb-2">
 <b>${d.name}</b><br>
+let price = isNaN(d.price) ? 0 : d.price;
 Giá: ${price.toLocaleString()}đ
 </div>`;
 });
@@ -146,6 +147,7 @@ document.getElementById("productList").innerHTML=html;
 
 </body>
 </html>
+
 
 
 
