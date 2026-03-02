@@ -3,183 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SUPER PRO 5.0</title>
+<title>SUPER PRO CLOUD</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
+
 <body class="bg-gray-100 p-8">
 
-<div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-10">
+<div id="authSection" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl">
+<h2 class="text-2xl font-bold mb-6">🔐 Đăng nhập SUPER PRO</h2>
 
-<h1 class="text-3xl font-bold mb-8">
-🔥 SUPER PRO 5.0 <span class="text-gray-400 text-lg">Personal Control</span>
-</h1>
+<input id="email" placeholder="Email" class="w-full border p-3 rounded-lg mb-4">
+<input id="password" type="password" placeholder="Mật khẩu" class="w-full border p-3 rounded-lg mb-4">
 
-<div class="flex gap-4 mb-8">
-<button onclick="showTab('salary')" 
-class="px-6 py-3 rounded-full bg-black text-white font-semibold">
-📊 Lương & Doanh Thu
-</button>
+<button onclick="login()" class="w-full bg-black text-white p-3 rounded-lg mb-2">Đăng nhập</button>
+<button onclick="register()" class="w-full bg-gray-800 text-white p-3 rounded-lg">Tạo tài khoản</button>
 </div>
 
-<!-- TARGET -->
-<div class="mb-6">
-<label class="text-sm text-gray-500">Mục tiêu doanh thu tháng</label>
-<input id="targetRevenue" type="number"
-class="w-full border rounded-xl p-3 mt-1"
-placeholder="Nhập mục tiêu (VD: 120000000)">
-</div>
+<div id="appSection" style="display:none" class="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-10">
 
-<div class="grid md:grid-cols-3 gap-6">
+<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO CLOUD</h1>
+
+<button onclick="logout()" class="mb-6 bg-red-500 text-white px-4 py-2 rounded">Đăng xuất</button>
+
+<div class="grid md:grid-cols-2 gap-6">
 
 <div>
-<label class="text-sm text-gray-500">Ngày</label>
-<input type="date" id="date" class="w-full border rounded-xl p-3 mt-1">
+<label>Tên sản phẩm</label>
+<input id="name" class="w-full border p-3 rounded mt-1">
 </div>
 
 <div>
-<label class="text-sm text-gray-500">Doanh thu hôm nay</label>
-<input type="number" id="revenue" class="w-full border rounded-xl p-3 mt-1">
-</div>
-
-<div>
-<label class="text-sm text-gray-500">Số đơn hôm nay</label>
-<input type="number" id="orders" class="w-full border rounded-xl p-3 mt-1">
+<label>Giá bán</label>
+<input id="price" type="number" class="w-full border p-3 rounded mt-1">
 </div>
 
 </div>
 
-<button onclick="saveDay()" 
-class="mt-6 bg-black text-white px-8 py-3 rounded-xl font-semibold shadow-lg">
-Lưu Ngày
+<button onclick="saveProduct()" class="mt-6 bg-black text-white px-6 py-3 rounded-lg">
+Lưu sản phẩm Cloud
 </button>
 
-<hr class="my-10">
+<hr class="my-8">
 
-<div id="dashboard" class="grid md:grid-cols-3 gap-6"></div>
-
-<div class="mt-8">
-<div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-<div id="progressBar"
-class="bg-black h-6 text-white text-sm flex items-center justify-center">
-</div>
-</div>
-</div>
-
-<hr class="my-10">
-
-<h2 class="text-xl font-bold mb-4">📈 Biểu đồ doanh thu</h2>
-<canvas id="revenueChart"></canvas>
-
-<hr class="my-10">
-
-<div id="forecastBox" class="bg-gray-50 p-6 rounded-xl"></div>
+<h2 class="text-xl font-bold mb-4">📂 Lịch sử sản phẩm</h2>
+<div id="productList"></div>
 
 </div>
 
 <script>
 
-let data = JSON.parse(localStorage.getItem("salesData")) || [];
-let chart;
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyALcfPUIDPwXGbXCyPBEkjGhz0xc0rYD_Y",
+  authDomain: "super-pro-cloud.firebaseapp.com",
+  projectId: "super-pro-cloud",
+  storageBucket: "super-pro-cloud.firebasestorage.app",
+  messagingSenderId: "716437022444",
+  appId: "1:716437022444:web:d5d8c92ede37a52e6527c9"
+};
 
-function formatMoney(num){
-return Number(num).toLocaleString("vi-VN")+"đ";
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser;
+
+// AUTH STATE
+auth.onAuthStateChanged(user => {
+if(user){
+currentUser = user;
+document.getElementById("authSection").style.display="none";
+document.getElementById("appSection").style.display="block";
+loadProducts();
+}else{
+document.getElementById("authSection").style.display="block";
+document.getElementById("appSection").style.display="none";
 }
-
-function saveDay(){
-let date=document.getElementById("date").value;
-let revenue=parseFloat(document.getElementById("revenue").value||0);
-let orders=parseInt(document.getElementById("orders").value||0);
-if(!date)return alert("Chọn ngày");
-data.push({date,revenue,orders});
-localStorage.setItem("salesData",JSON.stringify(data));
-render();
-}
-
-function render(){
-
-let totalRevenue=0,totalOrders=0;
-let highestRevenue=0,highestOrders=0;
-
-data.forEach(d=>{
-totalRevenue+=d.revenue;
-totalOrders+=d.orders;
-if(d.revenue>highestRevenue)highestRevenue=d.revenue;
-if(d.orders>highestOrders)highestOrders=d.orders;
 });
 
-let avgOrder = totalOrders>0 ? totalRevenue/totalOrders : 0;
-
-let base=6000000;
-let lunch=25_000*26;
-let fuel=600000;
-let attendance=500000;
-let orderBonus=totalOrders*5000;
-let revenueBonus=totalRevenue>=100_000_000?totalRevenue*0.05:0;
-let totalIncome=base+lunch+fuel+attendance+orderBonus+revenueBonus;
-
-document.getElementById("dashboard").innerHTML=`
-<div class="bg-gray-50 p-6 rounded-xl">
-<div class="text-gray-400 text-sm">Doanh thu</div>
-<div class="text-xl font-bold">${formatMoney(totalRevenue)}</div>
-</div>
-
-<div class="bg-gray-50 p-6 rounded-xl">
-<div class="text-gray-400 text-sm">Tổng đơn</div>
-<div class="text-xl font-bold">${totalOrders}</div>
-</div>
-
-<div class="bg-gray-50 p-6 rounded-xl">
-<div class="text-gray-400 text-sm">Thu nhập hiện tại</div>
-<div class="text-xl font-bold text-green-600">${formatMoney(totalIncome)}</div>
-</div>
-`;
-
-let target=parseFloat(document.getElementById("targetRevenue").value||100000000);
-let percent=(totalRevenue/target)*100;
-percent=percent>100?100:percent;
-document.getElementById("progressBar").style.width=percent+"%";
-document.getElementById("progressBar").innerText=percent.toFixed(1)+"%";
-
-let days=data.length;
-let avgDailyRevenue=days>0?totalRevenue/days:0;
-let predictedRevenue=avgDailyRevenue*30;
-let predictedIncome=totalIncome+(predictedRevenue-totalRevenue)*0.05;
-
-document.getElementById("forecastBox").innerHTML=`
-<b>Ngày cao nhất:</b> ${formatMoney(highestRevenue)}<br>
-<b>Đơn cao nhất:</b> ${highestOrders}<br>
-<b>Giá trị TB/đơn:</b> ${formatMoney(avgOrder)}<br>
-<hr>
-<b>Dự báo doanh thu tháng:</b> ${formatMoney(predictedRevenue)}<br>
-<b>Dự báo thu nhập tháng:</b> ${formatMoney(predictedIncome)}
-`;
-
-drawChart();
+// REGISTER
+function register(){
+let email=document.getElementById("email").value;
+let pass=document.getElementById("password").value;
+auth.createUserWithEmailAndPassword(email,pass)
+.then(()=>alert("Tạo tài khoản thành công"))
+.catch(err=>alert(err.message));
 }
 
-function drawChart(){
-let ctx=document.getElementById("revenueChart").getContext("2d");
-let labels=data.map(d=>d.date);
-let revenues=data.map(d=>d.revenue);
-
-if(chart) chart.destroy();
-
-chart=new Chart(ctx,{
-type:"line",
-data:{
-labels:labels,
-datasets:[{
-label:"Doanh thu",
-data:revenues,
-borderColor:"black",
-fill:false
-}]
+// LOGIN
+function login(){
+let email=document.getElementById("email").value;
+let pass=document.getElementById("password").value;
+auth.signInWithEmailAndPassword(email,pass)
+.catch(err=>alert(err.message));
 }
+
+// LOGOUT
+function logout(){
+auth.signOut();
+}
+
+// SAVE PRODUCT
+function saveProduct(){
+let name=document.getElementById("name").value;
+let price=parseFloat(document.getElementById("price").value);
+
+db.collection("products").add({
+uid: currentUser.uid,
+name,
+price,
+createdAt: new Date()
+}).then(()=>{
+alert("Đã lưu cloud");
+loadProducts();
 });
 }
 
-render();
+// LOAD PRODUCTS
+function loadProducts(){
+db.collection("products")
+.where("uid","==",currentUser.uid)
+.orderBy("createdAt","desc")
+.onSnapshot(snapshot=>{
+let html="";
+snapshot.forEach(doc=>{
+let d=doc.data();
+html+=`
+<div class="border p-4 rounded mb-2">
+<b>${d.name}</b><br>
+Giá: ${d.price.toLocaleString()}đ
+</div>`;
+});
+document.getElementById("productList").innerHTML=html;
+});
+}
 
 </script>
 
