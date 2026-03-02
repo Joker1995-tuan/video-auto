@@ -111,8 +111,8 @@ auth.signOut();
 // SAVE PRODUCT
 function saveProduct(){
 let name=document.getElementById("name").value;
-let price=parseFloat(document.getElementById("price").value);
-
+let price=parseFloat(document.getElementById("price").value || 0);
+if(!name) return alert("Nhập tên sản phẩm");
 db.collection("products").add({
 uid: currentUser.uid,
 name,
@@ -146,4 +146,5 @@ document.getElementById("productList").innerHTML=html;
 
 </body>
 </html>
+
 
