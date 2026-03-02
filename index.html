@@ -3,42 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Doanh Thu Nhân Viên Sàn</title>
+<title>SUPER PRO 4.0</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
 <div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
 
-<h1 class="text-2xl font-bold mb-6">🔥 Dashboard Lương & Doanh Thu</h1>
+<h1 class="text-2xl font-bold mb-6">🔥 SUPER PRO 4.0</h1>
 
-<!-- NHẬP DỮ LIỆU NGÀY -->
+<div class="flex gap-4 mb-6">
+<button onclick="showTab('video')" class="bg-black text-white px-4 py-2 rounded">🎬 Video & ROAS</button>
+<button onclick="showTab('salary')" class="bg-gray-800 text-white px-4 py-2 rounded">📊 Lương & Doanh Thu</button>
+</div>
+
+<!-- ================= VIDEO TOOL ================= -->
+<div id="videoTab">
+
+<div class="grid md:grid-cols-2 gap-4">
+<input id="name" placeholder="Tên sản phẩm" class="border p-3 rounded-lg">
+<input id="size" placeholder="Kích thước" class="border p-3 rounded-lg">
+<input id="price" placeholder="Giá bán" class="border p-3 rounded-lg">
+<input id="cost" placeholder="Giá xưởng" class="border p-3 rounded-lg">
+<input id="concept" placeholder="Concept" class="border p-3 rounded-lg">
+<input id="room" placeholder="Phòng sử dụng" class="border p-3 rounded-lg">
+<input id="target" placeholder="Tệp khách" class="border p-3 rounded-lg">
+<input id="ads" placeholder="Ngân sách ads" class="border p-3 rounded-lg">
+
+<select id="style" class="border p-3 rounded-lg col-span-2">
+<option value="luxury">Luxury</option>
+<option value="viral">Viral</option>
+<option value="emotional">Emotional</option>
+</select>
+</div>
+
+<button onclick="generateVideo()" class="mt-4 bg-black text-white px-6 py-3 rounded-xl">
+Tạo Nội Dung
+</button>
+
+<div class="mt-6 space-y-4">
+<textarea id="imagePrompt" class="w-full h-24 border p-3 rounded"></textarea>
+<textarea id="videoPrompt" class="w-full h-32 border p-3 rounded"></textarea>
+<textarea id="caption" class="w-full h-24 border p-3 rounded"></textarea>
+<div id="profitBox" class="bg-gray-100 p-4 rounded"></div>
+</div>
+
+</div>
+
+<!-- ================= SALARY DASHBOARD ================= -->
+<div id="salaryTab" style="display:none">
+
 <div class="grid md:grid-cols-3 gap-4">
-<input type="date" id="date" class="border p-3 rounded-lg">
-<input type="number" id="revenue" placeholder="Doanh thu hôm nay" class="border p-3 rounded-lg">
-<input type="number" id="orders" placeholder="Số đơn hôm nay" class="border p-3 rounded-lg">
+<input type="date" id="date">
+<input type="number" id="revenue" placeholder="Doanh thu hôm nay">
+<input type="number" id="orders" placeholder="Số đơn hôm nay">
 </div>
 
 <button onclick="saveDay()" class="mt-4 bg-black text-white px-6 py-3 rounded-xl">
 Lưu Ngày
 </button>
 
-<hr class="my-8">
+<hr class="my-6">
 
-<h2 class="text-xl font-bold mb-4">📊 Tổng Quan Tháng</h2>
-<div id="dashboard" class="bg-gray-100 p-6 rounded-lg space-y-2"></div>
+<div id="dashboard" class="bg-gray-100 p-4 rounded"></div>
 
-<div class="mt-6">
-<h2 class="font-bold mb-2">🎯 Tiến Trình 100 Triệu</h2>
-<div class="w-full bg-gray-200 rounded-full h-6">
+<div class="w-full bg-gray-200 rounded-full h-6 mt-4">
 <div id="progressBar" class="bg-green-500 h-6 rounded-full text-center text-white text-sm"></div>
 </div>
-</div>
 
-<hr class="my-8">
-
-<h2 class="text-xl font-bold mb-4">📅 Lịch Sử Nhập</h2>
-<table class="w-full border text-center">
+<table class="w-full mt-6 border text-center">
 <thead class="bg-gray-200">
 <tr>
 <th class="p-2 border">Ngày</th>
@@ -52,85 +85,108 @@ Lưu Ngày
 
 </div>
 
+</div>
+
 <script>
 
-let data = JSON.parse(localStorage.getItem("salesData")) || [];
-
-function formatMoney(num){
-return Number(num).toLocaleString("vi-VN") + "đ";
+function showTab(tab){
+document.getElementById("videoTab").style.display = tab==="video" ? "block" : "none";
+document.getElementById("salaryTab").style.display = tab==="salary" ? "block" : "none";
 }
 
+function formatMoney(num){
+return Number(num).toLocaleString("vi-VN")+"đ";
+}
+
+function generateVideo(){
+let name=name=document.getElementById("name").value;
+let size=document.getElementById("size").value;
+let price=parseFloat(document.getElementById("price").value||0);
+let cost=parseFloat(document.getElementById("cost").value||0);
+let ads=parseFloat(document.getElementById("ads").value||0);
+let concept=document.getElementById("concept").value;
+let room=document.getElementById("room").value;
+let target=document.getElementById("target").value;
+let style=document.getElementById("style").value;
+
+document.getElementById("imagePrompt").value=
+`Luxury ${room} interior, 5D painting "${name}", cinematic lighting, 4K`;
+
+document.getElementById("videoPrompt").value=
+`15s ${style} product video of "${name}" in ${room}, cinematic 4K`;
+
+document.getElementById("caption").value=
+`${name} - ${size}
+Phong cách ${concept}
+Giá ${formatMoney(price)}
+Phù hợp ${target}`;
+
+let fee=price*0.3;
+let profit=price-fee-cost-ads;
+let roas=ads>0?price/ads:0;
+
+document.getElementById("profitBox").innerHTML=
+`Phí 30%: ${formatMoney(fee)}<br>
+Lợi nhuận: <b>${formatMoney(profit)}</b><br>
+ROAS hòa vốn: ${roas.toFixed(2)}`;
+}
+
+/* ===== SALARY SYSTEM ===== */
+
+let data=JSON.parse(localStorage.getItem("salesData"))||[];
+
 function saveDay(){
-let date = document.getElementById("date").value;
-let revenue = parseFloat(document.getElementById("revenue").value || 0);
-let orders = parseInt(document.getElementById("orders").value || 0);
-
-if(!date) return alert("Chọn ngày");
-
-data.push({date, revenue, orders});
-localStorage.setItem("salesData", JSON.stringify(data));
-
+let date=document.getElementById("date").value;
+let revenue=parseFloat(document.getElementById("revenue").value||0);
+let orders=parseInt(document.getElementById("orders").value||0);
+if(!date)return alert("Chọn ngày");
+data.push({date,revenue,orders});
+localStorage.setItem("salesData",JSON.stringify(data));
 render();
 }
 
-function deleteDay(index){
-data.splice(index,1);
-localStorage.setItem("salesData", JSON.stringify(data));
+function deleteDay(i){
+data.splice(i,1);
+localStorage.setItem("salesData",JSON.stringify(data));
 render();
 }
 
 function render(){
+let totalRevenue=0,totalOrders=0;
+data.forEach(d=>{totalRevenue+=d.revenue;totalOrders+=d.orders;});
 
-let totalRevenue = 0;
-let totalOrders = 0;
+let base=6000000;
+let lunch=25_000*26;
+let fuel=600000;
+let attendance=500000;
+let orderBonus=totalOrders*5000;
+let revenueBonus=totalRevenue>=100_000_000?totalRevenue*0.05:0;
 
-data.forEach(d=>{
-totalRevenue += d.revenue;
-totalOrders += d.orders;
-});
+let totalIncome=base+lunch+fuel+attendance+orderBonus+revenueBonus;
 
-let baseSalary = 6000000;
-let lunch = 25_000 * 26;
-let fuel = 600000;
-let attendance = 500000;
-let orderBonus = totalOrders * 5000;
-let revenueBonus = totalRevenue >= 100_000_000 ? totalRevenue * 0.05 : 0;
-
-let totalIncome = baseSalary + lunch + fuel + attendance + orderBonus + revenueBonus;
-
-let avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-document.getElementById("dashboard").innerHTML = `
-Tổng doanh thu: <b>${formatMoney(totalRevenue)}</b><br>
+document.getElementById("dashboard").innerHTML=
+`Tổng doanh thu: <b>${formatMoney(totalRevenue)}</b><br>
 Tổng đơn: <b>${totalOrders}</b><br>
-Trung bình/đơn: <b>${formatMoney(avgOrder)}</b><br>
-Tiền 5k/đơn: <b>${formatMoney(orderBonus)}</b><br>
+5k/đơn: <b>${formatMoney(orderBonus)}</b><br>
 Thưởng 5%: <b>${formatMoney(revenueBonus)}</b><br>
 <hr>
-👉 Thu nhập tạm tính: <b class="text-green-600 text-lg">${formatMoney(totalIncome)}</b>
-`;
+👉 Thu nhập tạm tính: <b class="text-green-600">${formatMoney(totalIncome)}</b>`;
 
-let percent = (totalRevenue / 100_000_000) * 100;
-percent = percent > 100 ? 100 : percent;
+let percent=(totalRevenue/100_000_000)*100;
+percent=percent>100?100:percent;
+document.getElementById("progressBar").style.width=percent+"%";
+document.getElementById("progressBar").innerText=percent.toFixed(1)+"%";
 
-document.getElementById("progressBar").style.width = percent + "%";
-document.getElementById("progressBar").innerText = percent.toFixed(1) + "%";
-
-let historyHTML = "";
-data.forEach((d,index)=>{
-historyHTML += `
-<tr>
+let html="";
+data.forEach((d,i)=>{
+html+=`<tr>
 <td class="border p-2">${d.date}</td>
 <td class="border p-2">${formatMoney(d.revenue)}</td>
 <td class="border p-2">${d.orders}</td>
-<td class="border p-2">
-<button onclick="deleteDay(${index})" class="bg-red-500 text-white px-3 py-1 rounded">X</button>
-</td>
-</tr>
-`;
+<td class="border p-2"><button onclick="deleteDay(${i})" class="bg-red-500 text-white px-2 py-1 rounded">X</button></td>
+</tr>`;
 });
-
-document.getElementById("history").innerHTML = historyHTML;
+document.getElementById("history").innerHTML=html;
 }
 
 render();
