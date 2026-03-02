@@ -3,145 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tranh Video Pro</title>
+<title>Dashboard Doanh Thu Nhân Viên Sàn</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
-<div class="max-w-5xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
-<h1 class="text-2xl font-bold mb-6">🔥 App Tranh Shopee PRO</h1>
+<div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
 
-<div class="grid md:grid-cols-2 gap-4">
+<h1 class="text-2xl font-bold mb-6">🔥 Dashboard Lương & Doanh Thu</h1>
 
-<input id="name" placeholder="Tên sản phẩm" class="border p-3 rounded-lg">
-<input id="size" placeholder="Kích thước" class="border p-3 rounded-lg">
-<input id="price" placeholder="Giá bán" class="border p-3 rounded-lg">
-<input id="cost" placeholder="Giá xưởng" class="border p-3 rounded-lg">
-<input id="concept" placeholder="Concept (Luxury/Modern...)" class="border p-3 rounded-lg">
-<input id="room" placeholder="Phòng sử dụng" class="border p-3 rounded-lg">
-<input id="target" placeholder="Tệp khách" class="border p-3 rounded-lg">
-<input id="ads" placeholder="Ngân sách ads dự kiến" class="border p-3 rounded-lg">
-
-<select id="style" class="border p-3 rounded-lg col-span-2">
-<option value="luxury">Luxury</option>
-<option value="viral">Viral</option>
-<option value="emotional">Emotional</option>
-</select>
-
+<!-- NHẬP DỮ LIỆU NGÀY -->
+<div class="grid md:grid-cols-3 gap-4">
+<input type="date" id="date" class="border p-3 rounded-lg">
+<input type="number" id="revenue" placeholder="Doanh thu hôm nay" class="border p-3 rounded-lg">
+<input type="number" id="orders" placeholder="Số đơn hôm nay" class="border p-3 rounded-lg">
 </div>
 
-<button onclick="generate()" class="mt-6 bg-black text-white px-6 py-3 rounded-xl">
-Tạo Nội Dung PRO
+<button onclick="saveDay()" class="mt-4 bg-black text-white px-6 py-3 rounded-xl">
+Lưu Ngày
 </button>
 
-<div class="mt-8 space-y-6">
+<hr class="my-8">
 
-<div>
-<h2 class="font-bold">🎨 Prompt Ảnh</h2>
-<textarea id="imagePrompt" class="w-full h-28 border p-3 rounded-lg"></textarea>
-<button onclick="copyText('imagePrompt')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
+<h2 class="text-xl font-bold mb-4">📊 Tổng Quan Tháng</h2>
+<div id="dashboard" class="bg-gray-100 p-6 rounded-lg space-y-2"></div>
+
+<div class="mt-6">
+<h2 class="font-bold mb-2">🎯 Tiến Trình 100 Triệu</h2>
+<div class="w-full bg-gray-200 rounded-full h-6">
+<div id="progressBar" class="bg-green-500 h-6 rounded-full text-center text-white text-sm"></div>
+</div>
 </div>
 
-<div>
-<h2 class="font-bold">🎬 Prompt Video</h2>
-<textarea id="videoPrompt" class="w-full h-40 border p-3 rounded-lg"></textarea>
-<button onclick="copyText('videoPrompt')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
-</div>
+<hr class="my-8">
 
-<div>
-<h2 class="font-bold">🛒 Caption Shopee</h2>
-<textarea id="caption" class="w-full h-28 border p-3 rounded-lg"></textarea>
-<button onclick="copyText('caption')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
-</div>
+<h2 class="text-xl font-bold mb-4">📅 Lịch Sử Nhập</h2>
+<table class="w-full border text-center">
+<thead class="bg-gray-200">
+<tr>
+<th class="p-2 border">Ngày</th>
+<th class="p-2 border">Doanh Thu</th>
+<th class="p-2 border">Đơn</th>
+<th class="p-2 border">Xóa</th>
+</tr>
+</thead>
+<tbody id="history"></tbody>
+</table>
 
-<div>
-<h2 class="font-bold">💰 Phân tích lợi nhuận</h2>
-<div id="profit" class="bg-gray-100 p-4 rounded-lg"></div>
-</div>
-
-</div>
 </div>
 
 <script>
 
-function translateRoom(room) {
-room = room.toLowerCase();
-if (room.includes("khách")) return "living room";
-if (room.includes("ngủ")) return "bedroom";
-if (room.includes("văn")) return "office";
-if (room.includes("show")) return "showroom";
-return "interior space";
-}
+let data = JSON.parse(localStorage.getItem("salesData")) || [];
 
-function formatPrice(num) {
+function formatMoney(num){
 return Number(num).toLocaleString("vi-VN") + "đ";
 }
 
-function generate() {
+function saveDay(){
+let date = document.getElementById("date").value;
+let revenue = parseFloat(document.getElementById("revenue").value || 0);
+let orders = parseInt(document.getElementById("orders").value || 0);
 
-let name = document.getElementById("name").value;
-let size = document.getElementById("size").value;
-let price = parseFloat(document.getElementById("price").value || 0);
-let cost = parseFloat(document.getElementById("cost").value || 0);
-let concept = document.getElementById("concept").value;
-let room = document.getElementById("room").value;
-let target = document.getElementById("target").value;
-let ads = parseFloat(document.getElementById("ads").value || 0);
-let style = document.getElementById("style").value;
+if(!date) return alert("Chọn ngày");
 
-let roomEN = translateRoom(room);
-let formattedPrice = formatPrice(price);
+data.push({date, revenue, orders});
+localStorage.setItem("salesData", JSON.stringify(data));
 
-document.getElementById("imagePrompt").value =
-`Create a ${concept} ${roomEN} interior, warm cinematic lighting, large glossy 5D wall painting "${name}", ultra realistic, high-end photography, 4K`;
-
-let videoStyle = "";
-
-if(style==="luxury"){
-videoStyle = "Slow cinematic dolly-in, golden lighting, luxury mood.";
-}
-if(style==="viral"){
-videoStyle = "Fast cuts, dramatic zoom, strong hook in first 3 seconds.";
-}
-if(style==="emotional"){
-videoStyle = "Soft piano music mood, emotional storytelling camera movement.";
+render();
 }
 
-document.getElementById("videoPrompt").value =
-`Create a 15-second product video. ${videoStyle}
-Scene 1: Show ${roomEN}.
-Scene 2: Focus on painting "${name}".
-Scene 3: Light reflection across glossy surface.
-4K, 30fps.`;
+function deleteDay(index){
+data.splice(index,1);
+localStorage.setItem("salesData", JSON.stringify(data));
+render();
+}
 
-document.getElementById("caption").value =
-`🔥 ${name} - ${size}
+function render(){
 
-Phong cách ${concept}.
-Phù hợp ${room}.
-Dành cho ${target}.
+let totalRevenue = 0;
+let totalOrders = 0;
 
-Giá chỉ ${formattedPrice}
-Inbox ngay để được tư vấn!`;
+data.forEach(d=>{
+totalRevenue += d.revenue;
+totalOrders += d.orders;
+});
 
-let fee = price * 0.3;
-let realProfit = price - fee - cost - ads;
-let breakevenROAS = price / ads;
+let baseSalary = 6000000;
+let lunch = 25_000 * 26;
+let fuel = 600000;
+let attendance = 500000;
+let orderBonus = totalOrders * 5000;
+let revenueBonus = totalRevenue >= 100_000_000 ? totalRevenue * 0.05 : 0;
 
-document.getElementById("profit").innerHTML =
-`
-Phí sàn (30%): ${formatPrice(fee)} <br>
-Lợi nhuận sau phí & ads: <b>${formatPrice(realProfit)}</b> <br>
-ROAS hòa vốn: ${breakevenROAS.toFixed(2)}
+let totalIncome = baseSalary + lunch + fuel + attendance + orderBonus + revenueBonus;
+
+let avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+document.getElementById("dashboard").innerHTML = `
+Tổng doanh thu: <b>${formatMoney(totalRevenue)}</b><br>
+Tổng đơn: <b>${totalOrders}</b><br>
+Trung bình/đơn: <b>${formatMoney(avgOrder)}</b><br>
+Tiền 5k/đơn: <b>${formatMoney(orderBonus)}</b><br>
+Thưởng 5%: <b>${formatMoney(revenueBonus)}</b><br>
+<hr>
+👉 Thu nhập tạm tính: <b class="text-green-600 text-lg">${formatMoney(totalIncome)}</b>
 `;
+
+let percent = (totalRevenue / 100_000_000) * 100;
+percent = percent > 100 ? 100 : percent;
+
+document.getElementById("progressBar").style.width = percent + "%";
+document.getElementById("progressBar").innerText = percent.toFixed(1) + "%";
+
+let historyHTML = "";
+data.forEach((d,index)=>{
+historyHTML += `
+<tr>
+<td class="border p-2">${d.date}</td>
+<td class="border p-2">${formatMoney(d.revenue)}</td>
+<td class="border p-2">${d.orders}</td>
+<td class="border p-2">
+<button onclick="deleteDay(${index})" class="bg-red-500 text-white px-3 py-1 rounded">X</button>
+</td>
+</tr>
+`;
+});
+
+document.getElementById("history").innerHTML = historyHTML;
 }
 
-function copyText(id){
-let text = document.getElementById(id);
-text.select();
-document.execCommand("copy");
-alert("Đã copy!");
-}
+render();
 
 </script>
 
