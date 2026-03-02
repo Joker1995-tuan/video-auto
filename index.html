@@ -3,97 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Generator - Tranh Decor</title>
+<title>Tranh Video Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
-<h1 class="text-2xl font-bold mb-6">🎬 App Tạo Video Tranh Shopee</h1>
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
+<h1 class="text-2xl font-bold mb-6">🔥 App Tranh Shopee PRO</h1>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="grid md:grid-cols-2 gap-4">
 
 <input id="name" placeholder="Tên sản phẩm" class="border p-3 rounded-lg">
-<input id="size" placeholder="Kích thước (VD: 60x120)" class="border p-3 rounded-lg">
-<input id="price" placeholder="Giá bán (VD: 499000)" class="border p-3 rounded-lg">
+<input id="size" placeholder="Kích thước" class="border p-3 rounded-lg">
+<input id="price" placeholder="Giá bán" class="border p-3 rounded-lg">
+<input id="cost" placeholder="Giá xưởng" class="border p-3 rounded-lg">
 <input id="concept" placeholder="Concept (Luxury/Modern...)" class="border p-3 rounded-lg">
 <input id="room" placeholder="Phòng sử dụng" class="border p-3 rounded-lg">
-<input id="target" placeholder="Tệp khách hàng" class="border p-3 rounded-lg">
+<input id="target" placeholder="Tệp khách" class="border p-3 rounded-lg">
+<input id="ads" placeholder="Ngân sách ads dự kiến" class="border p-3 rounded-lg">
+
+<select id="style" class="border p-3 rounded-lg col-span-2">
+<option value="luxury">Luxury</option>
+<option value="viral">Viral</option>
+<option value="emotional">Emotional</option>
+</select>
 
 </div>
 
 <button onclick="generate()" class="mt-6 bg-black text-white px-6 py-3 rounded-xl">
-Tạo Nội Dung
+Tạo Nội Dung PRO
 </button>
 
 <div class="mt-8 space-y-6">
 
 <div>
 <h2 class="font-bold">🎨 Prompt Ảnh</h2>
-<textarea id="imagePrompt" class="w-full h-32 border p-3 rounded-lg"></textarea>
+<textarea id="imagePrompt" class="w-full h-28 border p-3 rounded-lg"></textarea>
+<button onclick="copyText('imagePrompt')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
 </div>
 
 <div>
 <h2 class="font-bold">🎬 Prompt Video</h2>
 <textarea id="videoPrompt" class="w-full h-40 border p-3 rounded-lg"></textarea>
+<button onclick="copyText('videoPrompt')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
 </div>
 
 <div>
 <h2 class="font-bold">🛒 Caption Shopee</h2>
-<textarea id="caption" class="w-full h-32 border p-3 rounded-lg"></textarea>
+<textarea id="caption" class="w-full h-28 border p-3 rounded-lg"></textarea>
+<button onclick="copyText('caption')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
 </div>
 
 <div>
-<h2 class="font-bold">✅ Checklist</h2>
-<div id="checklist" class="space-y-2"></div>
+<h2 class="font-bold">💰 Phân tích lợi nhuận</h2>
+<div id="profit" class="bg-gray-100 p-4 rounded-lg"></div>
 </div>
 
 </div>
 </div>
 
 <script>
+
+function translateRoom(room) {
+room = room.toLowerCase();
+if (room.includes("khách")) return "living room";
+if (room.includes("ngủ")) return "bedroom";
+if (room.includes("văn")) return "office";
+if (room.includes("show")) return "showroom";
+return "interior space";
+}
+
+function formatPrice(num) {
+return Number(num).toLocaleString("vi-VN") + "đ";
+}
+
 function generate() {
+
 let name = document.getElementById("name").value;
 let size = document.getElementById("size").value;
-let price = document.getElementById("price").value;
+let price = parseFloat(document.getElementById("price").value || 0);
+let cost = parseFloat(document.getElementById("cost").value || 0);
 let concept = document.getElementById("concept").value;
 let room = document.getElementById("room").value;
 let target = document.getElementById("target").value;
+let ads = parseFloat(document.getElementById("ads").value || 0);
+let style = document.getElementById("style").value;
+
+let roomEN = translateRoom(room);
+let formattedPrice = formatPrice(price);
 
 document.getElementById("imagePrompt").value =
-`Create a ${concept} ${room} interior, warm cinematic lighting, modern furniture, large glossy 5D wall painting named "${name}" mounted on the wall, ultra realistic, high-end photography, 4K`;
+`Create a ${concept} ${roomEN} interior, warm cinematic lighting, large glossy 5D wall painting "${name}", ultra realistic, high-end photography, 4K`;
+
+let videoStyle = "";
+
+if(style==="luxury"){
+videoStyle = "Slow cinematic dolly-in, golden lighting, luxury mood.";
+}
+if(style==="viral"){
+videoStyle = "Fast cuts, dramatic zoom, strong hook in first 3 seconds.";
+}
+if(style==="emotional"){
+videoStyle = "Soft piano music mood, emotional storytelling camera movement.";
+}
 
 document.getElementById("videoPrompt").value =
-`Create a 15-second cinematic luxury product video.
-Scene 1: Fade in to a ${concept} ${room}.
-Scene 2: Slow dolly-in to the painting "${name}".
-Scene 3: Light reflection moving across glossy surface.
-Scene 4: Close-up texture detail.
-Warm golden lighting, 4K, 30fps.`;
+`Create a 15-second product video. ${videoStyle}
+Scene 1: Show ${roomEN}.
+Scene 2: Focus on painting "${name}".
+Scene 3: Light reflection across glossy surface.
+4K, 30fps.`;
 
 document.getElementById("caption").value =
 `🔥 ${name} - ${size}
 
-Phong cách ${concept} dành cho ${target}.
-Phù hợp treo ${room}.
-Chất liệu 5D bóng sang trọng.
+Phong cách ${concept}.
+Phù hợp ${room}.
+Dành cho ${target}.
 
-Giá chỉ ${price}đ
+Giá chỉ ${formattedPrice}
 Inbox ngay để được tư vấn!`;
 
-document.getElementById("checklist").innerHTML =
+let fee = price * 0.3;
+let realProfit = price - fee - cost - ads;
+let breakevenROAS = price / ads;
+
+document.getElementById("profit").innerHTML =
 `
-<label><input type="checkbox"> Tạo ảnh</label><br>
-<label><input type="checkbox"> Upscale ảnh</label><br>
-<label><input type="checkbox"> Tạo video</label><br>
-<label><input type="checkbox"> Add to Scene</label><br>
-<label><input type="checkbox"> Thêm nhạc</label><br>
-<label><input type="checkbox"> Chèn sub</label><br>
-<label><input type="checkbox"> Xuất file 1:1</label><br>
-<label><input type="checkbox"> Upload Shopee</label><br>
-<label><input type="checkbox"> Test quảng cáo</label>
+Phí sàn (30%): ${formatPrice(fee)} <br>
+Lợi nhuận sau phí & ads: <b>${formatPrice(realProfit)}</b> <br>
+ROAS hòa vốn: ${breakevenROAS.toFixed(2)}
 `;
 }
+
+function copyText(id){
+let text = document.getElementById(id);
+text.select();
+document.execCommand("copy");
+alert("Đã copy!");
+}
+
 </script>
 
 </body>
