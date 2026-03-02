@@ -102,19 +102,11 @@ return Number(num).toLocaleString("vi-VN")+"đ";
 }
 // ================= VIDEO TAB =================
 
-  // ===== SWITCH TAB =====
-function switchTab(tab){
-   ...
-}
-
-
-// ===== INIT APP =====
 function initApp(){
-   renderVideoUI();
-   renderSalaryUI();
-   loadProducts();
-   loadRevenue();
-   switchTab("video");
+renderVideoUI();
+renderSalaryUI();
+loadProducts();
+loadRevenue();
 }
 
 // GIAO DIỆN VIDEO
@@ -212,6 +204,7 @@ document.getElementById("productList").innerHTML=html;
 function deleteProduct(id){
 db.collection("products").doc(id).delete();
 }
+  
 // ================= SALARY TAB =================
 
 function renderSalaryUI(){
@@ -372,6 +365,3 @@ fill:false
 </script>
 </body>
 </html>
-
-
-
