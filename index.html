@@ -92,9 +92,19 @@ function logout(){
 auth.signOut();
 }
 
-function showTab(tab){
-document.getElementById("videoTab").style.display = tab==="video"?"block":"none";
-document.getElementById("salaryTab").style.display = tab==="salary"?"block":"none";
+// ===== SWITCH TAB =====
+function switchTab(tab){
+
+if(tab==="video"){
+document.getElementById("videoTab").style.display="block";
+document.getElementById("salaryTab").style.display="none";
+}
+
+if(tab==="salary"){
+document.getElementById("videoTab").style.display="none";
+document.getElementById("salaryTab").style.display="block";
+}
+
 }
 
 function formatMoney(num){
@@ -365,3 +375,4 @@ fill:false
 </script>
 </body>
 </html>
+
