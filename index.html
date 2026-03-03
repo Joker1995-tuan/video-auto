@@ -2,22 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SUPER PRO REAL - SHOPEE</title>
+<title>SUPER PRO REAL V4 - AI ADS</title>
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 
 <body class="bg-gray-100 p-6">
-
 <div class="max-w-6xl mx-auto bg-white p-6 rounded shadow">
 
-<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO REAL – SHOPEE</h1>
+<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO REAL V4 – AI ADS OPTIMIZER</h1>
 
-<!-- AUTH -->
 <div id="authBox">
 <input id="email" placeholder="Email" class="border p-2 rounded w-full mb-2">
 <input id="password" type="password" placeholder="Password" class="border p-2 rounded w-full mb-2">
@@ -27,20 +24,13 @@
 </div>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none">
 
-<button id="btnLogout" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
-Đăng xuất
-</button>
+<button id="btnLogout" class="bg-red-500 text-white px-4 py-2 rounded mb-4">Đăng xuất</button>
 
 <div class="flex gap-4 mb-6">
-<button id="btnVideo" class="bg-black text-white px-4 py-2 rounded">
-🎬 Video PRO
-</button>
-<button id="btnSalary" class="bg-gray-700 text-white px-4 py-2 rounded">
-📊 Lương PRO
-</button>
+<button id="tabVideo" class="bg-black text-white px-4 py-2 rounded">🎬 Video PRO</button>
+<button id="tabSalary" class="bg-gray-700 text-white px-4 py-2 rounded">📊 Lương PRO</button>
 </div>
 
 <div id="videoTab"></div>
@@ -50,8 +40,6 @@
 </div>
 
 <script>
-
-// ================= FIREBASE =================
 
 const firebaseConfig = {
 apiKey: "AIzaSyALcfPUIDPwXGbXCyPBEkjGhz0xc0rYD_Y",
@@ -67,7 +55,12 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 let currentUser=null;
 
-// ================= AUTH =================
+document.addEventListener("DOMContentLoaded",()=>{
+
+const authBox=document.getElementById("authBox");
+const app=document.getElementById("app");
+const videoTab=document.getElementById("videoTab");
+const salaryTab=document.getElementById("salaryTab");
 
 btnRegister.onclick=()=>auth.createUserWithEmailAndPassword(email.value,password.value);
 btnLogin.onclick=()=>auth.signInWithEmailAndPassword(email.value,password.value);
@@ -85,38 +78,27 @@ app.style.display="none";
 }
 });
 
-// ================= TAB =================
-
-btnVideo.onclick=()=>switchTab("video");
-btnSalary.onclick=()=>switchTab("salary");
-
-function switchTab(tab){
-videoTab.style.display=tab==="video"?"block":"none";
-salaryTab.style.display=tab==="salary"?"block":"none";
-}
-
-// ================= INIT =================
+tabVideo.onclick=()=>{videoTab.style.display="block";salaryTab.style.display="none";}
+tabSalary.onclick=()=>{videoTab.style.display="none";salaryTab.style.display="block";}
 
 function initApp(){
 renderVideo();
 renderSalary();
-loadSavedTables();
 loadRevenue();
-switchTab("video");
 }
 
-// ================= VIDEO PRO =================
+// ================= VIDEO PRO AI =================
 
 function renderVideo(){
 videoTab.innerHTML=`
 <div class="mb-4">
-Phí mặc định (%): 
+Phí mặc định (%):
 <input id="defaultFee" type="number" value="30" class="border p-1 w-20 rounded ml-2">
-Mục tiêu lợi nhuận (%): 
+Mục tiêu lợi nhuận (%):
 <input id="targetProfit" type="number" value="20" class="border p-1 w-20 rounded ml-2">
 </div>
 
-<button onclick="addRow()" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+<button id="addRowBtn" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
 ➕ Thêm size
 </button>
 
@@ -124,125 +106,97 @@ Mục tiêu lợi nhuận (%):
 <thead class="bg-gray-100">
 <tr>
 <th class="border p-2">Size</th>
-<th class="border p-2">Giá bán</th>
+<th class="border p-2">Giá</th>
 <th class="border p-2">Xưởng</th>
-<th class="border p-2">Ads</th>
-<th class="border p-2">Phí %</th>
-<th class="border p-2">Lợi nhuận</th>
-<th class="border p-2">ROAS</th>
-<th class="border p-2">Trạng thái</th>
+<th class="border p-2">Phí%</th>
+<th class="border p-2">Ads tối ưu</th>
+<th class="border p-2">ROAS cần</th>
+<th class="border p-2">AI Gợi ý</th>
 </tr>
 </thead>
 <tbody id="productTable"></tbody>
 </table>
 
-<button onclick="saveTable()" class="bg-black text-white px-4 py-2 rounded mt-4">
-💾 Lưu bảng
-</button>
-
-<h2 class="text-xl font-bold mt-6 mb-4">📂 Bảng đã lưu</h2>
-<div id="savedTables"></div>
+<div id="aiSuggest" class="mt-6 text-lg font-bold"></div>
 `;
+
+document.getElementById("addRowBtn").addEventListener("click",addRow);
 }
 
 function addRow(){
 let fee=document.getElementById("defaultFee").value||30;
-let row=`
+productTable.insertAdjacentHTML("beforeend",`
 <tr>
 <td class="border p-2"><input class="size border p-1 w-full"></td>
 <td class="border p-2"><input type="number" class="price border p-1 w-full"></td>
 <td class="border p-2"><input type="number" class="cost border p-1 w-full"></td>
-<td class="border p-2"><input type="number" class="ads border p-1 w-full"></td>
 <td class="border p-2"><input type="number" value="${fee}" class="fee border p-1 w-full"></td>
-<td class="border p-2 profit"></td>
-<td class="border p-2 roas"></td>
+<td class="border p-2 adsOpt"></td>
+<td class="border p-2 roasNeed"></td>
 <td class="border p-2 status"></td>
 </tr>
-`;
-productTable.insertAdjacentHTML("beforeend",row);
-updateCalculation();
+`);
+updateCalc();
 }
 
-document.addEventListener("input",updateCalculation);
+document.addEventListener("input",updateCalc);
 
-function updateCalculation(){
-let rows=document.querySelectorAll("#productTable tr");
-let targetProfit=document.getElementById("targetProfit").value||20;
+function updateCalc(){
+let bestMargin=0;
+let bestSize="";
+let targetProfit=parseFloat(document.getElementById("targetProfit").value||20);
 
-rows.forEach(r=>{
+document.querySelectorAll("#productTable tr").forEach(r=>{
+let size=r.querySelector(".size")?.value||"";
 let price=parseFloat(r.querySelector(".price")?.value||0);
 let cost=parseFloat(r.querySelector(".cost")?.value||0);
-let ads=parseFloat(r.querySelector(".ads")?.value||0);
 let feePercent=parseFloat(r.querySelector(".fee")?.value||0);
 
 let fee=price*(feePercent/100);
-let profit=price-fee-cost-ads;
-let roas=ads>0?price/ads:0;
+let targetMoney=price*(targetProfit/100);
 
-r.querySelector(".profit").innerText=profit.toLocaleString();
-r.querySelector(".roas").innerText=roas.toFixed(2);
+let maxAds=price-fee-cost-targetMoney;
+let roasNeed=maxAds>0?price/maxAds:0;
 
-let margin=(profit/price)*100;
-let statusCell=r.querySelector(".status");
+r.querySelector(".adsOpt").innerText=maxAds>0?maxAds.toLocaleString():"0";
+r.querySelector(".roasNeed").innerText=roasNeed.toFixed(2);
 
-if(profit<0){
-statusCell.innerHTML="🔴 Lỗ";
+let margin=(price-fee-cost)/price*100;
+
+let status=r.querySelector(".status");
+
+if(maxAds<=0){
+status.innerText="❌ Không nên chạy";
 }
-else if(margin<10){
-statusCell.innerHTML="🟡 Lãi thấp";
+else if(margin>bestMargin){
+bestMargin=margin;
+bestSize=size;
+status.innerText="🚀 Scale mạnh";
 }
 else{
-statusCell.innerHTML="🟢 Tốt";
+status.innerText="⚠️ Test nhẹ";
 }
 });
+
+if(bestSize){
+aiSuggest.innerHTML="🏆 SIZE NÊN ĐẨY: <span class='text-green-600'>"+bestSize+"</span>";
+}
 }
 
-function saveTable(){
-let rows=[];
-document.querySelectorAll("#productTable tr").forEach(r=>{
-rows.push({
-size:r.querySelector(".size").value,
-price:r.querySelector(".price").value,
-cost:r.querySelector(".cost").value,
-ads:r.querySelector(".ads").value,
-fee:r.querySelector(".fee").value
-});
-});
-
-db.collection("tables").add({
-uid:currentUser.uid,
-rows,
-createdAt:new Date()
-});
-alert("Đã lưu bảng");
-}
-
-function loadSavedTables(){
-db.collection("tables")
-.where("uid","==",currentUser.uid)
-.onSnapshot(snap=>{
-let html="";
-snap.forEach(doc=>{
-html+=`<div class="border p-2 mb-2">Bảng tạo lúc ${new Date(doc.data().createdAt.seconds*1000).toLocaleString()}</div>`;
-});
-savedTables.innerHTML=html;
-});
-}
-
-// ================= SALARY PRO =================
+// ================= SALARY =================
 
 function renderSalary(){
 salaryTab.innerHTML=`
 <input id="s_date" type="date" class="border p-2 rounded mb-2">
 <input id="s_revenue" type="number" placeholder="Doanh thu hôm nay" class="border p-2 rounded mb-2">
 <input id="s_orders" type="number" placeholder="Số đơn hôm nay" class="border p-2 rounded mb-2">
-<button onclick="saveRevenue()" class="bg-black text-white px-4 py-2 rounded">
+<button id="saveRevenueBtn" class="bg-black text-white px-4 py-2 rounded">
 Lưu ngày
 </button>
-
-<h2 class="text-xl font-bold mt-6 mb-4">📅 Lịch sử</h2>
-<div id="revenueList"></div>
+<div id="revenueList" class="mt-4"></div>
 `;
+
+document.getElementById("saveRevenueBtn").addEventListener("click",saveRevenue);
 }
 
 function saveRevenue(){
@@ -275,6 +229,7 @@ revenueList.innerHTML=html+`<hr><b>Tổng thu nhập: ${totalIncome.toLocaleStri
 });
 }
 
+});
 </script>
 </body>
 </html>
