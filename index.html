@@ -2,8 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SUPER PRO CLOUD ULTIMATE</title>
-
+<title>SUPER PRO REAL - SHOPEE</title>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Firebase -->
@@ -14,23 +13,17 @@
 
 <body class="bg-gray-100 p-6">
 
-<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
+<div class="max-w-6xl mx-auto bg-white p-6 rounded shadow">
 
-<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO CLOUD ULTIMATE</h1>
+<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO REAL – SHOPEE</h1>
 
 <!-- AUTH -->
 <div id="authBox">
 <input id="email" placeholder="Email" class="border p-2 rounded w-full mb-2">
 <input id="password" type="password" placeholder="Password" class="border p-2 rounded w-full mb-2">
-
 <div class="flex gap-2">
-<button id="btnRegister" class="bg-blue-500 text-white px-4 py-2 rounded">
-Đăng ký
-</button>
-
-<button id="btnLogin" class="bg-black text-white px-4 py-2 rounded">
-Đăng nhập
-</button>
+<button id="btnRegister" class="bg-blue-500 text-white px-4 py-2 rounded">Đăng ký</button>
+<button id="btnLogin" class="bg-black text-white px-4 py-2 rounded">Đăng nhập</button>
 </div>
 </div>
 
@@ -43,11 +36,10 @@
 
 <div class="flex gap-4 mb-6">
 <button id="btnVideo" class="bg-black text-white px-4 py-2 rounded">
-🎬 Video & ROAS
+🎬 Video PRO
 </button>
-
 <button id="btnSalary" class="bg-gray-700 text-white px-4 py-2 rounded">
-📊 Lương & Doanh Thu
+📊 Lương PRO
 </button>
 </div>
 
@@ -73,186 +65,213 @@ appId: "1:716437022444:web:d5d8c92ede37a52e6527c9"
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-let currentUser = null;
+let currentUser=null;
 
 // ================= AUTH =================
 
-document.getElementById("btnRegister").addEventListener("click", () => {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
-auth.createUserWithEmailAndPassword(email, password);
-});
+btnRegister.onclick=()=>auth.createUserWithEmailAndPassword(email.value,password.value);
+btnLogin.onclick=()=>auth.signInWithEmailAndPassword(email.value,password.value);
+btnLogout.onclick=()=>auth.signOut();
 
-document.getElementById("btnLogin").addEventListener("click", () => {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
-auth.signInWithEmailAndPassword(email, password);
-});
-
-document.getElementById("btnLogout").addEventListener("click", () => {
-auth.signOut();
-});
-
-auth.onAuthStateChanged(user => {
-if (user) {
-currentUser = user;
-document.getElementById("authBox").style.display = "none";
-document.getElementById("app").style.display = "block";
+auth.onAuthStateChanged(user=>{
+if(user){
+currentUser=user;
+authBox.style.display="none";
+app.style.display="block";
 initApp();
-} else {
-document.getElementById("authBox").style.display = "block";
-document.getElementById("app").style.display = "none";
+}else{
+authBox.style.display="block";
+app.style.display="none";
 }
 });
 
-// ================= SWITCH TAB =================
+// ================= TAB =================
 
-document.getElementById("btnVideo").addEventListener("click", () => {
-switchTab("video");
-});
+btnVideo.onclick=()=>switchTab("video");
+btnSalary.onclick=()=>switchTab("salary");
 
-document.getElementById("btnSalary").addEventListener("click", () => {
-switchTab("salary");
-});
-
-function switchTab(tab) {
-document.getElementById("videoTab").style.display =
-tab === "video" ? "block" : "none";
-
-document.getElementById("salaryTab").style.display =
-tab === "salary" ? "block" : "none";
+function switchTab(tab){
+videoTab.style.display=tab==="video"?"block":"none";
+salaryTab.style.display=tab==="salary"?"block":"none";
 }
 
 // ================= INIT =================
 
-function initApp() {
-renderVideoUI();
-renderSalaryUI();
-loadProducts();
+function initApp(){
+renderVideo();
+renderSalary();
+loadSavedTables();
 loadRevenue();
 switchTab("video");
 }
 
-// ================= VIDEO =================
+// ================= VIDEO PRO =================
 
-function renderVideoUI() {
-document.getElementById("videoTab").innerHTML = `
-<div class="grid grid-cols-2 gap-4">
-<input id="p_name" placeholder="Tên sản phẩm" class="border p-2 rounded">
-<input id="p_size" placeholder="Kích thước" class="border p-2 rounded">
-<input id="p_price" type="number" placeholder="Giá bán" class="border p-2 rounded">
-<input id="p_cost" type="number" placeholder="Giá xưởng" class="border p-2 rounded">
-<input id="p_ads" type="number" placeholder="Ngân sách Ads" class="border p-2 rounded">
+function renderVideo(){
+videoTab.innerHTML=`
+<div class="mb-4">
+Phí mặc định (%): 
+<input id="defaultFee" type="number" value="30" class="border p-1 w-20 rounded ml-2">
+Mục tiêu lợi nhuận (%): 
+<input id="targetProfit" type="number" value="20" class="border p-1 w-20 rounded ml-2">
 </div>
 
-<button id="btnSaveProduct" class="mt-4 bg-black text-white px-4 py-2 rounded">
-Tạo & Lưu Sản Phẩm
+<button onclick="addRow()" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+➕ Thêm size
 </button>
 
-<div id="productResult" class="mt-4"></div>
+<table class="w-full border text-sm">
+<thead class="bg-gray-100">
+<tr>
+<th class="border p-2">Size</th>
+<th class="border p-2">Giá bán</th>
+<th class="border p-2">Xưởng</th>
+<th class="border p-2">Ads</th>
+<th class="border p-2">Phí %</th>
+<th class="border p-2">Lợi nhuận</th>
+<th class="border p-2">ROAS</th>
+<th class="border p-2">Trạng thái</th>
+</tr>
+</thead>
+<tbody id="productTable"></tbody>
+</table>
 
-<h2 class="text-xl font-bold mt-6 mb-4">📂 Lịch sử sản phẩm</h2>
-<div id="productList"></div>
+<button onclick="saveTable()" class="bg-black text-white px-4 py-2 rounded mt-4">
+💾 Lưu bảng
+</button>
+
+<h2 class="text-xl font-bold mt-6 mb-4">📂 Bảng đã lưu</h2>
+<div id="savedTables"></div>
 `;
-
-document.getElementById("btnSaveProduct").addEventListener("click", saveProduct);
 }
 
-function saveProduct() {
-let name = document.getElementById("p_name").value;
-let size = document.getElementById("p_size").value;
-let price = parseFloat(document.getElementById("p_price").value || 0);
-let cost = parseFloat(document.getElementById("p_cost").value || 0);
-let ads = parseFloat(document.getElementById("p_ads").value || 0);
-
-let fee = price * 0.3;
-let profit = price - fee - cost - ads;
-let roas = ads > 0 ? price / ads : 0;
-
-document.getElementById("productResult").innerHTML = `
-<div class="bg-gray-50 p-4 rounded">
-Phí 30%: ${fee.toLocaleString()}đ<br>
-Lợi nhuận: ${profit.toLocaleString()}đ<br>
-ROAS: ${roas.toFixed(2)}
-</div>
+function addRow(){
+let fee=document.getElementById("defaultFee").value||30;
+let row=`
+<tr>
+<td class="border p-2"><input class="size border p-1 w-full"></td>
+<td class="border p-2"><input type="number" class="price border p-1 w-full"></td>
+<td class="border p-2"><input type="number" class="cost border p-1 w-full"></td>
+<td class="border p-2"><input type="number" class="ads border p-1 w-full"></td>
+<td class="border p-2"><input type="number" value="${fee}" class="fee border p-1 w-full"></td>
+<td class="border p-2 profit"></td>
+<td class="border p-2 roas"></td>
+<td class="border p-2 status"></td>
+</tr>
 `;
+productTable.insertAdjacentHTML("beforeend",row);
+updateCalculation();
+}
 
-db.collection("products").add({
-uid: currentUser.uid,
-name,
-size,
-price,
-profit,
-roas,
-createdAt: new Date()
+document.addEventListener("input",updateCalculation);
+
+function updateCalculation(){
+let rows=document.querySelectorAll("#productTable tr");
+let targetProfit=document.getElementById("targetProfit").value||20;
+
+rows.forEach(r=>{
+let price=parseFloat(r.querySelector(".price")?.value||0);
+let cost=parseFloat(r.querySelector(".cost")?.value||0);
+let ads=parseFloat(r.querySelector(".ads")?.value||0);
+let feePercent=parseFloat(r.querySelector(".fee")?.value||0);
+
+let fee=price*(feePercent/100);
+let profit=price-fee-cost-ads;
+let roas=ads>0?price/ads:0;
+
+r.querySelector(".profit").innerText=profit.toLocaleString();
+r.querySelector(".roas").innerText=roas.toFixed(2);
+
+let margin=(profit/price)*100;
+let statusCell=r.querySelector(".status");
+
+if(profit<0){
+statusCell.innerHTML="🔴 Lỗ";
+}
+else if(margin<10){
+statusCell.innerHTML="🟡 Lãi thấp";
+}
+else{
+statusCell.innerHTML="🟢 Tốt";
+}
 });
 }
 
-function loadProducts() {
-db.collection("products")
-.where("uid", "==", currentUser.uid)
-.onSnapshot(snapshot => {
-let html = "";
-snapshot.forEach(doc => {
-let d = doc.data();
-html += `
-<div class="border p-3 rounded mb-2">
-<b>${d.name}</b> (${d.size})<br>
-Giá: ${d.price?.toLocaleString()}đ<br>
-ROAS: ${d.roas?.toFixed(2)}
-</div>`;
+function saveTable(){
+let rows=[];
+document.querySelectorAll("#productTable tr").forEach(r=>{
+rows.push({
+size:r.querySelector(".size").value,
+price:r.querySelector(".price").value,
+cost:r.querySelector(".cost").value,
+ads:r.querySelector(".ads").value,
+fee:r.querySelector(".fee").value
 });
-document.getElementById("productList").innerHTML = html;
+});
+
+db.collection("tables").add({
+uid:currentUser.uid,
+rows,
+createdAt:new Date()
+});
+alert("Đã lưu bảng");
+}
+
+function loadSavedTables(){
+db.collection("tables")
+.where("uid","==",currentUser.uid)
+.onSnapshot(snap=>{
+let html="";
+snap.forEach(doc=>{
+html+=`<div class="border p-2 mb-2">Bảng tạo lúc ${new Date(doc.data().createdAt.seconds*1000).toLocaleString()}</div>`;
+});
+savedTables.innerHTML=html;
 });
 }
 
-// ================= SALARY =================
+// ================= SALARY PRO =================
 
-function renderSalaryUI() {
-document.getElementById("salaryTab").innerHTML = `
+function renderSalary(){
+salaryTab.innerHTML=`
 <input id="s_date" type="date" class="border p-2 rounded mb-2">
 <input id="s_revenue" type="number" placeholder="Doanh thu hôm nay" class="border p-2 rounded mb-2">
 <input id="s_orders" type="number" placeholder="Số đơn hôm nay" class="border p-2 rounded mb-2">
-
-<button id="btnSaveRevenue" class="bg-black text-white px-4 py-2 rounded">
+<button onclick="saveRevenue()" class="bg-black text-white px-4 py-2 rounded">
 Lưu ngày
 </button>
 
 <h2 class="text-xl font-bold mt-6 mb-4">📅 Lịch sử</h2>
 <div id="revenueList"></div>
 `;
-
-document.getElementById("btnSaveRevenue").addEventListener("click", saveRevenue);
 }
 
-function saveRevenue() {
-let date = document.getElementById("s_date").value;
-let revenue = parseFloat(document.getElementById("s_revenue").value || 0);
-let orders = parseInt(document.getElementById("s_orders").value || 0);
-
+function saveRevenue(){
 db.collection("dailyRevenue").add({
-uid: currentUser.uid,
-date,
-revenue,
-orders,
-createdAt: new Date()
+uid:currentUser.uid,
+date:s_date.value,
+revenue:parseFloat(s_revenue.value||0),
+orders:parseInt(s_orders.value||0),
+createdAt:new Date()
 });
 }
 
-function loadRevenue() {
+function loadRevenue(){
 db.collection("dailyRevenue")
-.where("uid", "==", currentUser.uid)
-.onSnapshot(snapshot => {
-let html = "";
-snapshot.forEach(doc => {
-let d = doc.data();
-html += `
-<div class="border p-3 rounded mb-2">
-${d.date} - ${d.revenue?.toLocaleString()}đ - ${d.orders} đơn
-</div>`;
+.where("uid","==",currentUser.uid)
+.onSnapshot(snap=>{
+let totalRevenue=0,totalOrders=0,html="";
+snap.forEach(doc=>{
+let d=doc.data();
+totalRevenue+=d.revenue;
+totalOrders+=d.orders;
+html+=`${d.date} - ${d.revenue.toLocaleString()}đ - ${d.orders} đơn<br>`;
 });
-document.getElementById("revenueList").innerHTML = html;
+let base=6000000,lunch=25000*26,fuel=600000,att=500000;
+let orderBonus=totalOrders*5000;
+let revenueBonus=totalRevenue>=100000000?totalRevenue*0.05:0;
+let totalIncome=base+lunch+fuel+att+orderBonus+revenueBonus;
+
+revenueList.innerHTML=html+`<hr><b>Tổng thu nhập: ${totalIncome.toLocaleString()}đ</b>`;
 });
 }
 
