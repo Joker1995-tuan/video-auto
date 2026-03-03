@@ -1,378 +1,227 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SUPER PRO CLOUD ULTIMATE</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 
 <body class="bg-gray-100 p-6">
 
+<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
+
+<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO CLOUD ULTIMATE</h1>
+
 <!-- LOGIN -->
-<div id="authSection" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl">
-<h2 class="text-2xl font-bold mb-6">🔐 Đăng nhập SUPER PRO</h2>
+<div id="authBox">
+<input id="email" placeholder="Email" class="border p-2 rounded w-full mb-2">
+<input id="password" type="password" placeholder="Password" class="border p-2 rounded w-full mb-2">
 
-<input id="email" placeholder="Email" class="w-full border p-3 rounded-lg mb-4">
-<input id="password" type="password" placeholder="Mật khẩu" class="w-full border p-3 rounded-lg mb-4">
+<button onclick="register()" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">
+Đăng ký
+</button>
 
-<button onclick="login()" class="w-full bg-black text-white p-3 rounded-lg mb-2">Đăng nhập</button>
-<button onclick="register()" class="w-full bg-gray-800 text-white p-3 rounded-lg">Tạo tài khoản</button>
+<button onclick="login()" class="bg-black text-white px-4 py-2 rounded">
+Đăng nhập
+</button>
 </div>
 
 <!-- APP -->
-<div id="appSection" style="display:none" class="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-8">
+<div id="app" style="display:none">
 
-<h1 class="text-3xl font-bold mb-6">🔥 SUPER PRO CLOUD ULTIMATE</h1>
-<button onclick="logout()" class="mb-6 bg-red-500 text-white px-4 py-2 rounded">Đăng xuất</button>
+<button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
+Đăng xuất
+</button>
 
 <div class="flex gap-4 mb-6">
-<button onclick="showTab('video')" class="bg-black text-white px-4 py-2 rounded">🎬 Video & ROAS</button>
-<button onclick="showTab('salary')" class="bg-gray-800 text-white px-4 py-2 rounded">📊 Lương & Doanh Thu</button>
+<button onclick="switchTab('video')" class="bg-black text-white px-4 py-2 rounded">
+🎬 Video & ROAS
+</button>
+
+<button onclick="switchTab('salary')" class="bg-gray-700 text-white px-4 py-2 rounded">
+📊 Lương & Doanh Thu
+</button>
 </div>
 
 <div id="videoTab"></div>
 <div id="salaryTab" style="display:none"></div>
 
 </div>
+</div>
 
 <script>
 
 // FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyALcfPUIDPwXGbXCyPBEkjGhz0xc0rYD_Y",
-  authDomain: "super-pro-cloud.firebaseapp.com",
-  projectId: "super-pro-cloud",
-  storageBucket: "super-pro-cloud.firebasestorage.app",
-  messagingSenderId: "716437022444",
-  appId: "1:716437022444:web:d5d8c92ede37a52e6527c9"
+apiKey: "AIzaSyALcfPUIDPwXGbXCyPBEkjGhz0xc0rYD_Y",
+authDomain: "super-pro-cloud.firebaseapp.com",
+projectId: "super-pro-cloud",
+storageBucket: "super-pro-cloud.firebasestorage.app",
+messagingSenderId: "716437022444",
+appId: "1:716437022444:web:d5d8c92ede37a52e6527c9"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser;
-let chart;
+let currentUser = null;
 
-auth.onAuthStateChanged(user=>{
-if(user){
-currentUser=user;
-document.getElementById("authSection").style.display="none";
-document.getElementById("appSection").style.display="block";
-initApp();
-}else{
-document.getElementById("authSection").style.display="block";
-document.getElementById("appSection").style.display="none";
-}
-});
-
+// AUTH
 function register(){
-auth.createUserWithEmailAndPassword(
-document.getElementById("email").value,
-document.getElementById("password").value
-).catch(e=>alert(e.message));
+let email = document.getElementById("email").value;
+let password = document.getElementById("password").value;
+auth.createUserWithEmailAndPassword(email,password);
 }
 
 function login(){
-auth.signInWithEmailAndPassword(
-document.getElementById("email").value,
-document.getElementById("password").value
-).catch(e=>alert(e.message));
+let email = document.getElementById("email").value;
+let password = document.getElementById("password").value;
+auth.signInWithEmailAndPassword(email,password);
 }
 
 function logout(){
 auth.signOut();
 }
 
-// ===== SWITCH TAB =====
+auth.onAuthStateChanged(user=>{
+if(user){
+currentUser = user;
+document.getElementById("authBox").style.display="none";
+document.getElementById("app").style.display="block";
+initApp();
+}else{
+document.getElementById("authBox").style.display="block";
+document.getElementById("app").style.display="none";
+}
+});
+
+// SWITCH TAB
 function switchTab(tab){
-
-if(tab==="video"){
-document.getElementById("videoTab").style.display="block";
-document.getElementById("salaryTab").style.display="none";
+document.getElementById("videoTab").style.display = tab==="video"?"block":"none";
+document.getElementById("salaryTab").style.display = tab==="salary"?"block":"none";
 }
 
-if(tab==="salary"){
-document.getElementById("videoTab").style.display="none";
-document.getElementById("salaryTab").style.display="block";
-}
-
-}
-
-function formatMoney(num){
-return Number(num).toLocaleString("vi-VN")+"đ";
-}
-// ================= VIDEO TAB =================
-
+// INIT
 function initApp(){
 renderVideoUI();
 renderSalaryUI();
 loadProducts();
 loadRevenue();
+switchTab("video");
 }
 
-// GIAO DIỆN VIDEO
+// VIDEO UI
 function renderVideoUI(){
 document.getElementById("videoTab").innerHTML = `
-<div class="grid md:grid-cols-2 gap-4">
-
-<input id="p_name" placeholder="Tên sản phẩm" class="border p-3 rounded">
-<input id="p_size" placeholder="Kích thước" class="border p-3 rounded">
-
-<input id="p_price" type="number" placeholder="Giá bán" class="border p-3 rounded">
-<input id="p_cost" type="number" placeholder="Giá xưởng" class="border p-3 rounded">
-
-<input id="p_ads" type="number" placeholder="Ngân sách Ads" class="border p-3 rounded">
-<input id="p_concept" placeholder="Concept" class="border p-3 rounded">
-
+<div class="grid grid-cols-2 gap-4">
+<input id="p_name" placeholder="Tên sản phẩm" class="border p-2 rounded">
+<input id="p_size" placeholder="Kích thước" class="border p-2 rounded">
+<input id="p_price" type="number" placeholder="Giá bán" class="border p-2 rounded">
+<input id="p_cost" type="number" placeholder="Giá xưởng" class="border p-2 rounded">
+<input id="p_ads" type="number" placeholder="Ngân sách Ads" class="border p-2 rounded">
 </div>
 
-<button onclick="generateProduct()" class="mt-4 bg-black text-white px-6 py-2 rounded">
+<button onclick="saveProduct()" class="mt-4 bg-black text-white px-4 py-2 rounded">
 Tạo & Lưu Sản Phẩm
 </button>
 
-<div id="productResult" class="mt-6"></div>
+<div id="productResult" class="mt-4"></div>
 
-<h2 class="text-xl font-bold mt-8 mb-4">📂 Lịch sử sản phẩm</h2>
+<h2 class="text-xl font-bold mt-6 mb-4">📂 Lịch sử sản phẩm</h2>
 <div id="productList"></div>
 `;
 }
 
-// TẠO & LƯU
-function generateProduct(){
-
+function saveProduct(){
 let name=document.getElementById("p_name").value;
 let size=document.getElementById("p_size").value;
 let price=parseFloat(document.getElementById("p_price").value||0);
 let cost=parseFloat(document.getElementById("p_cost").value||0);
 let ads=parseFloat(document.getElementById("p_ads").value||0);
-let concept=document.getElementById("p_concept").value;
 
-if(!name) return alert("Nhập tên sản phẩm");
+let fee = price*0.3;
+let profit = price-fee-cost-ads;
+let roas = ads>0?price/ads:0;
 
-let fee = price * 0.3;
-let profit = price - fee - cost - ads;
-let roas = ads>0 ? price/ads : 0;
-
-document.getElementById("productResult").innerHTML = `
+document.getElementById("productResult").innerHTML=`
 <div class="bg-gray-50 p-4 rounded">
-<b>Phí 30%:</b> ${formatMoney(fee)}<br>
-<b>Lợi nhuận:</b> ${formatMoney(profit)}<br>
-<b>ROAS hòa vốn:</b> ${roas.toFixed(2)}
+Phí 30%: ${fee.toLocaleString()}đ<br>
+Lợi nhuận: ${profit.toLocaleString()}đ<br>
+ROAS: ${roas.toFixed(2)}
 </div>
 `;
 
 db.collection("products").add({
 uid: currentUser.uid,
-name,
-size,
-price,
-cost,
-ads,
-profit,
-roas,
-createdAt: new Date()
+name,size,price,profit,roas
 });
-
 }
 
-// LOAD PRODUCTS
 function loadProducts(){
-db.collection("products")
-.where("uid","==",currentUser.uid)
+db.collection("products").where("uid","==",currentUser.uid)
 .onSnapshot(snapshot=>{
 let html="";
 snapshot.forEach(doc=>{
 let d=doc.data();
-let price = isNaN(d.price)?0:d.price;
-
 html+=`
-<div class="border p-4 rounded mb-2 flex justify-between">
-<div>
-<b>${d.name}</b> (${d.size||""})<br>
-Giá: ${price.toLocaleString()}đ<br>
-ROAS: ${d.roas?.toFixed(2) || 0}
-</div>
-<button onclick="deleteProduct('${doc.id}')" 
-class="bg-red-500 text-white px-3 py-1 rounded">
-Xóa
-</button>
+<div class="border p-3 rounded mb-2">
+<b>${d.name}</b> (${d.size})<br>
+Giá: ${d.price?.toLocaleString()}đ<br>
+ROAS: ${d.roas?.toFixed(2)}
 </div>`;
 });
 document.getElementById("productList").innerHTML=html;
 });
 }
 
-function deleteProduct(id){
-db.collection("products").doc(id).delete();
-}
-  
-// ================= SALARY TAB =================
-
+// SALARY UI
 function renderSalaryUI(){
-document.getElementById("salaryTab").innerHTML = `
+document.getElementById("salaryTab").innerHTML=`
+<input id="s_date" type="date" class="border p-2 rounded mb-2">
+<input id="s_revenue" type="number" placeholder="Doanh thu hôm nay" class="border p-2 rounded mb-2">
+<input id="s_orders" type="number" placeholder="Số đơn hôm nay" class="border p-2 rounded mb-2">
 
-<div class="mb-4">
-<input id="targetRevenue" type="number"
-placeholder="Mục tiêu tháng (VD: 120000000)"
-class="border p-3 rounded w-full">
-</div>
-
-<div class="grid md:grid-cols-3 gap-4">
-
-<input type="date" id="s_date" class="border p-3 rounded">
-<input type="number" id="s_revenue" placeholder="Doanh thu hôm nay" class="border p-3 rounded">
-<input type="number" id="s_orders" placeholder="Số đơn hôm nay" class="border p-3 rounded">
-
-</div>
-
-<button onclick="saveRevenue()" 
-class="mt-4 bg-black text-white px-6 py-2 rounded">
-Lưu Ngày
+<button onclick="saveRevenue()" class="bg-black text-white px-4 py-2 rounded">
+Lưu ngày
 </button>
 
-<hr class="my-6">
-
-<div id="salaryDashboard" class="grid md:grid-cols-3 gap-4"></div>
-
-<div class="mt-6">
-<div class="w-full bg-gray-200 rounded-full h-6">
-<div id="progressBar" 
-class="bg-black h-6 text-white text-sm flex items-center justify-center">
-</div>
-</div>
-</div>
-
-<hr class="my-6">
-
-<h2 class="text-xl font-bold mb-4">📈 Biểu đồ doanh thu</h2>
-<canvas id="revenueChart"></canvas>
-
-<hr class="my-6">
-
-<h2 class="text-xl font-bold mb-4">📅 Lịch sử ngày</h2>
+<h2 class="text-xl font-bold mt-6 mb-4">📅 Lịch sử</h2>
 <div id="revenueList"></div>
-
 `;
 }
 
-// LƯU DOANH THU
 function saveRevenue(){
-
 let date=document.getElementById("s_date").value;
 let revenue=parseFloat(document.getElementById("s_revenue").value||0);
 let orders=parseInt(document.getElementById("s_orders").value||0);
 
-if(!date) return alert("Chọn ngày");
-
 db.collection("dailyRevenue").add({
 uid: currentUser.uid,
-date,
-revenue,
-orders,
-createdAt: new Date()
+date,revenue,orders
 });
-
 }
 
-// LOAD DOANH THU
 function loadRevenue(){
-db.collection("dailyRevenue")
-.where("uid","==",currentUser.uid)
+db.collection("dailyRevenue").where("uid","==",currentUser.uid)
 .onSnapshot(snapshot=>{
-
-let totalRevenue=0;
-let totalOrders=0;
-let labels=[];
-let revenues=[];
 let html="";
-
 snapshot.forEach(doc=>{
 let d=doc.data();
-totalRevenue+=d.revenue;
-totalOrders+=d.orders;
-labels.push(d.date);
-revenues.push(d.revenue);
-
 html+=`
-<div class="border p-4 rounded mb-2 flex justify-between">
-<div>
-${d.date}<br>
-${formatMoney(d.revenue)} - ${d.orders} đơn
-</div>
-<button onclick="deleteRevenue('${doc.id}')" 
-class="bg-red-500 text-white px-3 py-1 rounded">
-Xóa
-</button>
+<div class="border p-3 rounded mb-2">
+${d.date} - ${d.revenue?.toLocaleString()}đ - ${d.orders} đơn
 </div>`;
 });
-
 document.getElementById("revenueList").innerHTML=html;
-
-// LƯƠNG
-let base=6000000;
-let lunch=25000*26;
-let fuel=600000;
-let attendance=500000;
-let orderBonus=totalOrders*5000;
-let revenueBonus=totalRevenue>=100000000?totalRevenue*0.05:0;
-let totalIncome=base+lunch+fuel+attendance+orderBonus+revenueBonus;
-
-document.getElementById("salaryDashboard").innerHTML=`
-<div class="bg-gray-50 p-4 rounded">
-Doanh thu<br><b>${formatMoney(totalRevenue)}</b>
-</div>
-<div class="bg-gray-50 p-4 rounded">
-Tổng đơn<br><b>${totalOrders}</b>
-</div>
-<div class="bg-gray-50 p-4 rounded">
-Thu nhập<br><b>${formatMoney(totalIncome)}</b>
-</div>
-`;
-
-// TIẾN TRÌNH
-let target=parseFloat(document.getElementById("targetRevenue").value||100000000);
-let percent=(totalRevenue/target)*100;
-percent=percent>100?100:percent;
-document.getElementById("progressBar").style.width=percent+"%";
-document.getElementById("progressBar").innerText=percent.toFixed(1)+"%";
-
-// BIỂU ĐỒ
-drawChart(labels,revenues);
-
 });
 }
 
-function deleteRevenue(id){
-db.collection("dailyRevenue").doc(id).delete();
-}
-
-function drawChart(labels,dataValues){
-let ctx=document.getElementById("revenueChart").getContext("2d");
-if(chart) chart.destroy();
-
-chart=new Chart(ctx,{
-type:"line",
-data:{
-labels:labels,
-datasets:[{
-label:"Doanh thu",
-data:dataValues,
-borderColor:"black",
-fill:false
-}]
-}
-});
-}
 </script>
 </body>
 </html>
-
