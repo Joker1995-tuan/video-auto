@@ -3,202 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SUPER PRO SELLER CENTER v2</title>
-
+<title>Tranh Video Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Firebase compat -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body class="bg-gray-100 p-6">
 
-<div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
+<h1 class="text-2xl font-bold mb-6">🔥 App Tranh Shopee PRO</h1>
 
-<h1 class="text-2xl font-bold mb-6">
-🚀 SUPER PRO SELLER CENTER v2
-</h1>
+<div class="grid md:grid-cols-2 gap-4">
 
-<div id="app"></div>
+<input id="name" placeholder="Tên sản phẩm" class="border p-3 rounded-lg">
+<input id="size" placeholder="Kích thước" class="border p-3 rounded-lg">
+<input id="price" placeholder="Giá bán" class="border p-3 rounded-lg">
+<input id="cost" placeholder="Giá xưởng" class="border p-3 rounded-lg">
+<input id="concept" placeholder="Concept (Luxury/Modern...)" class="border p-3 rounded-lg">
+<input id="room" placeholder="Phòng sử dụng" class="border p-3 rounded-lg">
+<input id="target" placeholder="Tệp khách" class="border p-3 rounded-lg">
+<input id="ads" placeholder="Ngân sách ads dự kiến" class="border p-3 rounded-lg">
 
+<select id="style" class="border p-3 rounded-lg col-span-2">
+<option value="luxury">Luxury</option>
+<option value="viral">Viral</option>
+<option value="emotional">Emotional</option>
+</select>
+
+</div>
+
+<button onclick="generate()" class="mt-6 bg-black text-white px-6 py-3 rounded-xl">
+Tạo Nội Dung PRO
+</button>
+
+<div class="mt-8 space-y-6">
+
+<div>
+<h2 class="font-bold">🎨 Prompt Ảnh</h2>
+<textarea id="imagePrompt" class="w-full h-28 border p-3 rounded-lg"></textarea>
+<button onclick="copyText('imagePrompt')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
+</div>
+
+<div>
+<h2 class="font-bold">🎬 Prompt Video</h2>
+<textarea id="videoPrompt" class="w-full h-40 border p-3 rounded-lg"></textarea>
+<button onclick="copyText('videoPrompt')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
+</div>
+
+<div>
+<h2 class="font-bold">🛒 Caption Shopee</h2>
+<textarea id="caption" class="w-full h-28 border p-3 rounded-lg"></textarea>
+<button onclick="copyText('caption')" class="mt-2 bg-gray-200 px-4 py-2 rounded">Copy</button>
+</div>
+
+<div>
+<h2 class="font-bold">💰 Phân tích lợi nhuận</h2>
+<div id="profit" class="bg-gray-100 p-4 rounded-lg"></div>
+</div>
+
+</div>
 </div>
 
 <script>
 
-// ================= FIREBASE CONFIG =================
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCwZMWbmobqHkjbmCKnqpqm-NUjZNe_Ru8",
-  authDomain: "super-pro-seller-v3.firebaseapp.com",
-  projectId: "super-pro-seller-v3",
-  storageBucket: "super-pro-seller-v3.firebasestorage.app",
-  messagingSenderId: "648387756445",
-  appId: "1:648387756445:web:c8fc9236b327112e80ef74"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-let currentUser = null;
-
-// ================= LOGIN =================
-
-auth.signInAnonymously();
-
-auth.onAuthStateChanged(user => {
-if(user){
-currentUser = user;
-renderDashboard();
+function translateRoom(room) {
+room = room.toLowerCase();
+if (room.includes("khách")) return "living room";
+if (room.includes("ngủ")) return "bedroom";
+if (room.includes("văn")) return "office";
+if (room.includes("show")) return "showroom";
+return "interior space";
 }
-});
 
-// ================= DASHBOARD =================
+function formatPrice(num) {
+return Number(num).toLocaleString("vi-VN") + "đ";
+}
 
-function renderDashboard(){
-document.getElementById("app").innerHTML = `
-<div class="grid md:grid-cols-4 gap-4 mb-6">
+function generate() {
 
-<div class="bg-gray-100 p-4 rounded-xl">
-<div class="text-sm text-gray-500">Doanh thu tháng</div>
-<div id="totalRevenue" class="text-xl font-bold">0đ</div>
-</div>
+let name = document.getElementById("name").value;
+let size = document.getElementById("size").value;
+let price = parseFloat(document.getElementById("price").value || 0);
+let cost = parseFloat(document.getElementById("cost").value || 0);
+let concept = document.getElementById("concept").value;
+let room = document.getElementById("room").value;
+let target = document.getElementById("target").value;
+let ads = parseFloat(document.getElementById("ads").value || 0);
+let style = document.getElementById("style").value;
 
-<div class="bg-gray-100 p-4 rounded-xl">
-<div class="text-sm text-gray-500">Lợi nhuận tháng</div>
-<div id="totalProfit" class="text-xl font-bold">0đ</div>
-</div>
+let roomEN = translateRoom(room);
+let formattedPrice = formatPrice(price);
 
-<div class="bg-gray-100 p-4 rounded-xl">
-<div class="text-sm text-gray-500">Tổng đơn</div>
-<div id="totalOrders" class="text-xl font-bold">0</div>
-</div>
+document.getElementById("imagePrompt").value =
+`Create a ${concept} ${roomEN} interior, warm cinematic lighting, large glossy 5D wall painting "${name}", ultra realistic, high-end photography, 4K`;
 
-<div class="bg-gray-100 p-4 rounded-xl">
-<div class="text-sm text-gray-500">ROAS TB</div>
-<div id="avgRoas" class="text-xl font-bold">0</div>
-</div>
+let videoStyle = "";
 
-</div>
+if(style==="luxury"){
+videoStyle = "Slow cinematic dolly-in, golden lighting, luxury mood.";
+}
+if(style==="viral"){
+videoStyle = "Fast cuts, dramatic zoom, strong hook in first 3 seconds.";
+}
+if(style==="emotional"){
+videoStyle = "Soft piano music mood, emotional storytelling camera movement.";
+}
 
-<canvas id="revenueChart" height="100"></canvas>
+document.getElementById("videoPrompt").value =
+`Create a 15-second product video. ${videoStyle}
+Scene 1: Show ${roomEN}.
+Scene 2: Focus on painting "${name}".
+Scene 3: Light reflection across glossy surface.
+4K, 30fps.`;
 
-<hr class="my-6">
+document.getElementById("caption").value =
+`🔥 ${name} - ${size}
 
-<h2 class="font-bold mb-3">➕ Thêm dữ liệu ngày</h2>
+Phong cách ${concept}.
+Phù hợp ${room}.
+Dành cho ${target}.
 
-<div class="grid md:grid-cols-4 gap-4">
-<input type="date" id="date" class="border p-2 rounded">
-<input type="number" id="revenue" placeholder="Doanh thu" class="border p-2 rounded">
-<input type="number" id="profit" placeholder="Lợi nhuận" class="border p-2 rounded">
-<input type="number" id="orders" placeholder="Số đơn" class="border p-2 rounded">
-</div>
+Giá chỉ ${formattedPrice}
+Inbox ngay để được tư vấn!`;
 
-<button onclick="saveDay()" 
-class="mt-4 bg-black text-white px-6 py-2 rounded">
-Lưu ngày
-</button>
+let fee = price * 0.3;
+let realProfit = price - fee - cost - ads;
+let breakevenROAS = price / ads;
 
-<hr class="my-6">
-
-<div id="history"></div>
+document.getElementById("profit").innerHTML =
+`
+Phí sàn (30%): ${formatPrice(fee)} <br>
+Lợi nhuận sau phí & ads: <b>${formatPrice(realProfit)}</b> <br>
+ROAS hòa vốn: ${breakevenROAS.toFixed(2)}
 `;
-
-loadData();
 }
 
-// ================= SAVE DATA =================
-
-function saveDay(){
-db.collection("users")
-.doc(currentUser.uid)
-.collection("reports")
-.add({
-date: document.getElementById("date").value,
-revenue: Number(document.getElementById("revenue").value),
-profit: Number(document.getElementById("profit").value),
-orders: Number(document.getElementById("orders").value),
-createdAt: new Date()
-});
-}
-
-// ================= LOAD DATA =================
-
-function loadData(){
-
-db.collection("users")
-.doc(currentUser.uid)
-.collection("reports")
-.orderBy("createdAt")
-.onSnapshot(snapshot => {
-
-let totalRevenue = 0;
-let totalProfit = 0;
-let totalOrders = 0;
-
-let labels = [];
-let revenues = [];
-
-let html = "";
-
-snapshot.forEach(doc => {
-let d = doc.data();
-
-totalRevenue += d.revenue;
-totalProfit += d.profit;
-totalOrders += d.orders;
-
-labels.push(d.date);
-revenues.push(d.revenue);
-
-html += `
-<div class="border p-3 rounded mb-2">
-${d.date} | ${d.revenue.toLocaleString()}đ | ${d.profit.toLocaleString()}đ | ${d.orders} đơn
-</div>
-`;
-});
-
-document.getElementById("totalRevenue").innerText = totalRevenue.toLocaleString()+"đ";
-document.getElementById("totalProfit").innerText = totalProfit.toLocaleString()+"đ";
-document.getElementById("totalOrders").innerText = totalOrders;
-
-let avgRoas = totalProfit>0 ? (totalRevenue/totalProfit).toFixed(2) : 0;
-document.getElementById("avgRoas").innerText = avgRoas;
-
-document.getElementById("history").innerHTML = html;
-
-drawChart(labels, revenues);
-
-});
-}
-
-// ================= CHART =================
-
-let chart;
-
-function drawChart(labels, data){
-const ctx = document.getElementById("revenueChart");
-
-if(chart){
-chart.destroy();
-}
-
-chart = new Chart(ctx, {
-type: "line",
-data: {
-labels: labels,
-datasets: [{
-label: "Doanh thu",
-data: data,
-borderWidth: 2
-}]
-}
-});
+function copyText(id){
+let text = document.getElementById(id);
+text.select();
+document.execCommand("copy");
+alert("Đã copy!");
 }
 
 </script>
